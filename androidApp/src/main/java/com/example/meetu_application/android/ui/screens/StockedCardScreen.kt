@@ -100,7 +100,7 @@ fun StackedCardScreen(
                 }
             }else{
                 val visibleCardCount = otherCards.size.coerceAtMost(8)
-                val fabVerticalOffset = (visibleCardCount * 32).dp + 300.dp
+                val fabVerticalOffset = (visibleCardCount * 32).dp + 280.dp
                 FloatingActionButton(
                     onClick = onAddClick,
                     containerColor = com.example.meetu_application.android.ui.theme.colorMeetU,
@@ -132,7 +132,8 @@ fun StackedCardScreen(
                         },
                         label = "AlphaAnimation"
                     )
-
+                    val bottomAlpha = (1f - index / 10f).coerceIn(0.2f, 1f) // Più alto è l'indice, più trasparente in basso
+                    val contentAlpha = (1f - index / 8f).coerceIn(0.1f, 1f) // Dissolvo il contenuto (scritte)
                     CardView(
                         card = card,
                         modifier = Modifier
@@ -141,7 +142,10 @@ fun StackedCardScreen(
                             .fillMaxWidth(0.9f)
                             .height(140.dp)
                             .graphicsLayer { alpha = alphaValue }
-                            .zIndex(-index.toFloat())
+                            .zIndex(-index.toFloat()),
+                        bottomGradientAlpha = bottomAlpha,
+                        contentAlpha = contentAlpha
+
                     )
                 }
             }

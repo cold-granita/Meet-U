@@ -1,98 +1,160 @@
 package com.example.meetu_application.android.ui.components
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.meetu_application.android.data.model.Card
-import com.example.meetu_application.android.ui.theme.colorMeetU
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardView(
     card: Card,
-    isPreferred: Boolean = false,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    isPreferred: Boolean? = null,
+    bottomGradientAlpha: Float = 1f,
+    contentAlpha: Float = 1f
 
 ) {
-    Card(
-        onClick = onClick,
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 12.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isPreferred) Color(0xFFE0F7FA) else Color(0xFFF9F9F9)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isPreferred) 10.dp else 6.dp),
-        border = if (isPreferred) BorderStroke(2.dp, colorMeetU) else null
+            .padding(12.dp)
     ) {
-        Column(
+        Card(
+            onClick = onClick,
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+                .fillMaxWidth()
+                .heightIn(200.dp)
         ) {
-            Text(
-                text = "${card.name} ${card.surname}",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = colorMeetU
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            card.telephoneNumber?.let {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Phone,
-                        contentDescription = "Telefono",
-                        tint = colorMeetU,
-                        modifier = Modifier.size(20.dp)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clipToBounds()
+                    .heightIn(200.dp)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFF5B84FF),                                   // colore alto
+                                Color(0xFF67BFFF).copy(alpha = bottomGradientAlpha)  // colore basso con alpha variabile
+                            )
+                        )
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(it, style = MaterialTheme.typography.bodyMedium)
-                }
-            }
 
-            card.email?.let {
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Email,
-                        contentDescription = "Email",
-                        tint = colorMeetU,
-                        modifier = Modifier.size(20.dp)
+            ) {
+                // Canvas decorativa
+                androidx.compose.foundation.Canvas(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(200.dp)
+                ) {
+                    val canvasWidth = size.width
+                    val canvasHeight = size.height
+
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            colors = listOf(Color(0xFF3C6DFF), Color(0xFF4791FF)),
+                            center = Offset(x = canvasWidth, y = 0f),
+                            radius = canvasWidth * 0.3f
+                        ),
+                        radius = canvasWidth * 0.3f,
+                        center = Offset(x = canvasWidth, y = 0f)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(it, style = MaterialTheme.typography.bodyMedium)
+
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            colors = listOf(Color(0xFF4975FD), Color(0xFF5498FF)),
+                            center = Offset(x = 0f, y = canvasHeight),
+                            radius = canvasWidth * 0.25f
+                        ),
+                        radius = canvasWidth * 0.25f,
+                        center = Offset(x = 0f, y = canvasHeight)
+                    )
                 }
+
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .graphicsLayer { alpha = contentAlpha }
+                ) {
+                    // Parte in alto: nome, cognome e titolo
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(
+                            text = "${card.name} ${card.surname}",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        card.title?.let {
+                            Text(
+                                it,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    // Parte centrata verticalmente: gli altri campi
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        card.telephoneNumber?.let { IconTextRow(Icons.Default.Phone, it, Color.White) }
+                        card.email?.let { IconTextRow(Icons.Default.Email, it, Color.White) }
+                        card.webSite?.let { IconTextRow(Icons.Default.Share, it, Color.White) }
+                        card.organization?.let { IconTextRow(Icons.Default.Home, it, Color.White) }
+                    }
+                }
+
             }
         }
     }
 }
 
+@Composable
+fun IconTextRow(icon: ImageVector, text: String, contentColor: Color = Color.White ) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = contentColor,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text, style = MaterialTheme.typography.bodyMedium, color = contentColor)
+    }
+}

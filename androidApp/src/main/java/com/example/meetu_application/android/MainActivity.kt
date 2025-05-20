@@ -4,11 +4,8 @@ import AppNavigation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.meetu_application.android.ui.screens.MainScreen
-import com.example.meetu_application.android.ui.screens.WalletScreen
+import com.example.meetu_application.android.data.nfc.VCardApduService
 import com.example.meetu_application.android.ui.theme.MyApplicationTheme
 
 class MainActivity : ComponentActivity() {
@@ -16,9 +13,15 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
-
             MyApplicationTheme {
-                AppNavigation(navController)
+                AppNavigation(
+                    navController = navController,
+                    onVCardReady = { vCard ->
+                        VCardApduService.currentVCard = vCard
+                    },
+                    onWriterReady = { nfcWriter, statusCallback ->
+                        statusCallback("Writer NFC pronto")
+                      }  )
             }
         }
     }

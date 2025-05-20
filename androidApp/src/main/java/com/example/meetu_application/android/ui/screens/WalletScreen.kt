@@ -1,5 +1,6 @@
 package com.example.meetu_application.android.ui.screens
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
@@ -52,11 +53,11 @@ fun WalletScreen(navController: NavHostController) {
 
     Scaffold(topBar = {
         CenterAlignedTopAppBar(title = {
-                Text(
-                    "Il mio Wallet",
-                    style = MaterialTheme.typography.titleLarge
-                )
-            },
+            Text(
+                "Il mio Wallet",
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
             navigationIcon = {
                 IconButton(onClick = { navController.popBackStack() }) {
                     Icon(
@@ -81,9 +82,14 @@ fun WalletScreen(navController: NavHostController) {
                 ) {
                     CardView(
                         card = card,
+                        onClick = {
+                            navController.navigate("cardDetail/${card.id}")
+                            Log.d("DEBUG", "Clicked card id: ${card.id}")
+
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(140.dp)
+                            .height(200.dp)
                     )
                 }
             }

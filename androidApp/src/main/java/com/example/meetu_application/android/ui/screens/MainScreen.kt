@@ -100,9 +100,18 @@ fun MainScreen(navController: NavHostController) {
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 16.dp)
             ) {
-                IconWithLabel(Icons.Default.AccountBox, "Wallet")
-                IconWithLabel(Icons.Default.AccountCircle, "NFC writer")
-                IconWithLabel(Icons.Default.DateRange, "QR code")
+                IconWithLabel(
+                    Icons.Default.AccountBox, "Wallet",
+                    onClick = { navController.navigate("wallet") }
+                )
+                IconWithLabel(
+                    Icons.Default.AccountCircle, "NFC writer",
+                    onClick = { navController.navigate("nfcWriter") }
+                )
+                IconWithLabel(
+                    Icons.Default.DateRange, "NFC reader",
+                    onClick = { navController.navigate("nfcReader")}
+                )
             }
 
             if (showDialog) {

@@ -6,11 +6,11 @@ plugins {
 
 android {
     namespace = "com.example.meetu_application.android"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         applicationId = "com.example.meetu_application.android"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
     }
@@ -43,10 +43,19 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose.android)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
     debugImplementation(libs.compose.ui.tooling)
-    implementation("com.google.code.gson:gson:2.10.1")
-    implementation ("com.google.accompanist:accompanist-navigation-animation:0.32.0")
-    implementation("androidx.compose.animation:animation:1.7.0-beta01")
-    implementation("androidx.compose.animation:animation-graphics:1.7.0-beta01")
+    implementation(libs.gson)
+    implementation (libs.accompanist.navigation.animation)
+    implementation(libs.androidx.animation.v170beta01)
+    implementation(libs.androidx.animation.graphics)
 
+
+    implementation(libs.androidx.compose.animation)
+    implementation(libs.androidx.navigation.compose)
+
+    implementation (libs.core)
+    implementation (libs.androidx.ui.graphics)
 }

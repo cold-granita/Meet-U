@@ -2,13 +2,17 @@ package com.example.meetu_application.android.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-val colorMeetU = Color(0xff00f1c9)
+val colorMeetU = Color(0xFF0060F1)
 
 @Composable
 fun MyApplicationTheme(
@@ -17,15 +21,15 @@ fun MyApplicationTheme(
 ) {
     val colors = if (darkTheme) {
         darkColorScheme(
-            primary = Color(0xFFBB86FC),
-            secondary = Color(0xFF03DAC5),
-            tertiary = Color(0xFF3700B3)
+            primary = Color(0xFF86D7FC),
+            secondary = Color(0xFF0364DA),
+            tertiary = Color(0xFF0057B3)
         )
     } else {
         lightColorScheme(
-            primary = Color(0xFF6200EE),
-            secondary = Color(0xFF03DAC5),
-            tertiary = Color(0xFF3700B3)
+            primary = Color(0xFF009BEE),
+            secondary = Color(0xFF0339DA),
+            tertiary = Color(0xFF030085)
         )
     }
 

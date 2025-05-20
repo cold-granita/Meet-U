@@ -1,5 +1,6 @@
 package com.example.meetu_application.android.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -13,13 +14,20 @@ import androidx.compose.ui.unit.sp
 import com.example.meetu_application.android.ui.theme.colorMeetU
 
 @Composable
-fun IconWithLabel(icon: ImageVector, label: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+fun IconWithLabel(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable(onClick = onClick)
+    ) {
         Icon(
             imageVector = icon,
             contentDescription = label,
             modifier = Modifier.size(32.dp),
-            tint = colorMeetU
+            tint = colorMeetU,
         )
         Text(text = label, fontSize = 12.sp)
     }
