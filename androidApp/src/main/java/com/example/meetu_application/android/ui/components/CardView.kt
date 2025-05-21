@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.meetu_application.android.data.model.Card
 
@@ -40,7 +41,6 @@ import com.example.meetu_application.android.data.model.Card
 fun CardView(
     card: Card,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {},
     isPreferred: Boolean? = null,
     bottomGradientAlpha: Float = 1f,
     contentAlpha: Float = 1f
@@ -52,19 +52,18 @@ fun CardView(
             .padding(12.dp)
     ) {
         Card(
-            onClick = onClick,
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(200.dp)
+                .heightIn(220.dp)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clipToBounds()
-                    .heightIn(200.dp)
+                    .heightIn(220.dp)
                     .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
@@ -79,7 +78,7 @@ fun CardView(
                 androidx.compose.foundation.Canvas(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(200.dp)
+                        .heightIn(220.dp)
                 ) {
                     val canvasWidth = size.width
                     val canvasHeight = size.height
@@ -109,7 +108,7 @@ fun CardView(
                     modifier = Modifier
                         .padding(20.dp)
                         .fillMaxWidth()
-                        .height(200.dp)
+                        .height(220.dp)
                         .graphicsLayer { alpha = contentAlpha }
                 ) {
                     // Parte in alto: nome, cognome e titolo
@@ -133,10 +132,19 @@ fun CardView(
 
                     // Parte centrata verticalmente: gli altri campi
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        card.telephoneNumber?.let { IconTextRow(Icons.Default.Phone, it, Color.White) }
-                        card.email?.let { IconTextRow(Icons.Default.Email, it, Color.White) }
-                        card.webSite?.let { IconTextRow(Icons.Default.Share, it, Color.White) }
-                        card.organization?.let { IconTextRow(Icons.Default.Home, it, Color.White) }
+                        card.telephoneNumber?.takeIf { it.isNotBlank() }?.let {
+                            IconTextRow(Icons.Default.Phone, it, Color.White)
+                        }
+                        card.email?.takeIf { it.isNotBlank() }?.let {
+                            IconTextRow(Icons.Default.Email, it, Color.White)
+                        }
+                        card.webSite?.takeIf { it.isNotBlank() }?.let {
+                            IconTextRow(Icons.Default.Share, it, Color.White)
+                        }
+                        card.organization?.takeIf { it.isNotBlank() }?.let {
+                            IconTextRow(Icons.Default.Home, it, Color.White)
+                        }
+
                     }
                 }
 
@@ -152,9 +160,9 @@ fun IconTextRow(icon: ImageVector, text: String, contentColor: Color = Color.Whi
             imageVector = icon,
             contentDescription = null,
             tint = contentColor,
-            modifier = Modifier.size(20.dp)
+            modifier = Modifier.size(15.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text, style = MaterialTheme.typography.bodyMedium, color = contentColor)
+        Text(text, style = MaterialTheme.typography.bodySmall, color = contentColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }

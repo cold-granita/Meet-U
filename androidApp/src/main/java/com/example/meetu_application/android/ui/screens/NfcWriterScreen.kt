@@ -1,13 +1,19 @@
 package com.example.meetu_application.android.ui.screens
 
 import android.app.Activity
+import android.nfc.NdefMessage
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -21,6 +27,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -29,11 +36,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.meetu_application.android.data.nfc.NFCWriteCallback
 import com.example.meetu_application.android.data.nfc.NFCWriter
+import com.example.meetu_application.android.data.utils.isValidEmail
+import com.example.meetu_application.android.data.utils.isValidPhone
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,18 +57,24 @@ fun NfcWriterScreen(
     val context = LocalContext.current
     val activity = context as? Activity ?: return
 
-
     var selectedType by remember { mutableStateOf("text") }
     var inputData by remember { mutableStateOf("") }
 
     // Campi separati per vCard
-    var vcardName by remember { mutableStateOf("") }
-    var vcardPhone by remember { mutableStateOf("") }
-    var vcardEmail by remember { mutableStateOf("") }
-    var vcardOrganization by remember { mutableStateOf("") }
-    var vcardTitle by remember { mutableStateOf("") }
-    var vcardAddress by remember { mutableStateOf("") }
-    var vcardWebsite by remember { mutableStateOf("") }
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var organization by remember { mutableStateOf("") }
+    var title by remember { mutableStateOf("") }
+    var address by remember { mutableStateOf("") }
+    var website by remember { mutableStateOf("") }
+
+    // Stati per validazione (se il campo è stato toccato e perso il focus)
+    var touchedFirstName by remember { mutableStateOf(false) }
+    var touchedLastName by remember { mutableStateOf(false) }
+    var touchedPhone by remember { mutableStateOf(false) }
+    var touchedEmail by remember { mutableStateOf(false) }
 
     var writeStatus by remember { mutableStateOf("") }
 
@@ -76,12 +95,14 @@ fun NfcWriterScreen(
         }
     }
 
+    val scrollState = rememberScrollState()
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("NFC WRITER", style = MaterialTheme.typography.titleLarge) },
+                title = { Text("NFC Writer", style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = { navController.navigate("main") }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Torna indietro"
@@ -96,9 +117,10 @@ fun NfcWriterScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp)
+                .verticalScroll(scrollState),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text("Scegli il tipo di dato:", style = MaterialTheme.typography.labelLarge)
-            Spacer(modifier = Modifier.height(8.dp))
             Row {
                 listOf("text", "url", "vcard").forEach { type ->
                     OutlinedButton(
@@ -107,55 +129,73 @@ fun NfcWriterScreen(
                             .padding(end = 8.dp)
                             .weight(1f),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = if (selectedType == type) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surface
+                            containerColor = if (selectedType == type) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else MaterialTheme.colorScheme.primary
                         ),
-                        border = ButtonDefaults.outlinedButtonBorder(enabled = selectedType == type)
+                        border = BorderStroke(
+                            width = 2.dp,
+                            color = if (selectedType == type)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.primary
+                        )
                     ) {
                         Text(
                             type.uppercase(),
                             color = if (selectedType == type)
                                 MaterialTheme.colorScheme.primary
                             else
-                                MaterialTheme.colorScheme.onSurface
+                                Color.White
                         )
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             when (selectedType) {
                 "text" -> InputField(
                     label = "Inserisci testo",
                     placeholder = "Ciao mondo",
                     value = inputData,
-                    onValueChange = { inputData = it }
+                    onValueChange = { inputData = it },
+                    isError = false,
+                    errorMessage = null,
+                    onFocusLost = {}
                 )
                 "url" -> InputField(
                     label = "Inserisci link (https://...)",
                     placeholder = "https://www.example.com",
                     value = inputData,
-                    onValueChange = { inputData = it }
+                    onValueChange = { inputData = it },
+                    isError = false,
+                    errorMessage = null,
+                    onFocusLost = {}
                 )
                 "vcard" -> VCardForm(
-                    name = vcardName,
-                    onNameChange = { vcardName = it },
-                    phone = vcardPhone,
-                    onPhoneChange = { vcardPhone = it },
-                    email = vcardEmail,
-                    onEmailChange = { vcardEmail = it },
-                    organization = vcardOrganization,
-                    onOrganizationChange = { vcardOrganization = it },
-                    title = vcardTitle,
-                    onTitleChange = { vcardTitle = it },
-                    address = vcardAddress,
-                    onAddressChange = { vcardAddress = it },
-                    website = vcardWebsite,
-                    onWebsiteChange = { vcardWebsite = it }
+                    firstName = firstName,
+                    onFirstNameChange = { firstName = it },
+                    lastName = lastName,
+                    onLastNameChange = { lastName = it },
+                    phone = phone,
+                    onPhoneChange = { phone = it },
+                    email = email,
+                    onEmailChange = { email = it },
+                    organization = organization,
+                    onOrganizationChange = { organization = it },
+                    title = title,
+                    onTitleChange = { title = it },
+                    address = address,
+                    onAddressChange = { address = it },
+                    website = website,
+                    onWebsiteChange = { website = it },
+                    touchedFirstName = touchedFirstName,
+                    onFirstNameFocusLost = { touchedFirstName = true },
+                    touchedLastName = touchedLastName,
+                    onLastNameFocusLost = { touchedLastName = true },
+                    touchedPhone = touchedPhone,
+                    onPhoneFocusLost = { touchedPhone = true },
+                    touchedEmail = touchedEmail,
+                    onEmailFocusLost = { touchedEmail = true }
                 )
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
 
             Button(
                 onClick = {
@@ -163,13 +203,14 @@ fun NfcWriterScreen(
                         "text" -> NFCWriter.createTextMessage(inputData)
                         "url" -> NFCWriter.createUriMessage(inputData)
                         "vcard" -> createVCardMessageOrNull(
-                            vcardName,
-                            vcardPhone,
-                            vcardEmail,
-                            vcardOrganization,
-                            vcardTitle,
-                            vcardAddress,
-                            vcardWebsite
+                            firstName,
+                            lastName,
+                            phone,
+                            email,
+                            organization,
+                            title,
+                            address,
+                            website
                         )
                         else -> null
                     }
@@ -181,17 +222,25 @@ fun NfcWriterScreen(
                         writeStatus = "Formato non valido per il tipo selezionato."
                     }
                 },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = isWriteEnabled(selectedType, inputData, vcardName, vcardPhone, vcardEmail)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(60.dp),
+                enabled = isWriteEnabled(
+                    selectedType,
+                    inputData,
+                    firstName,
+                    lastName,
+                    phone,
+                    email
+                )
             ) {
                 Text("Scrivi su tag NFC")
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
             Text(
                 text = writeStatus,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 8.dp)
             )
         }
     }
@@ -208,21 +257,60 @@ private fun InputField(
     label: String,
     placeholder: String,
     value: String,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    isError: Boolean,
+    errorMessage: String?,
+    onFocusLost: () -> Unit
 ) {
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(label) },
-        placeholder = { Text(placeholder) },
-        modifier = Modifier.fillMaxWidth()
-    )
+    var hasFocus by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        TextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(label) },
+            placeholder = { Text(placeholder) },
+            isError = isError,
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { focusState ->
+                    if (hasFocus && !focusState.isFocused) {
+                        onFocusLost()
+                    }
+                    hasFocus = focusState.isFocused
+                },
+            shape = RoundedCornerShape(28.dp),
+            singleLine = false,
+
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color(0xFF9FD0FF),
+                unfocusedContainerColor = Color(0xFFC8E4FF),
+                errorContainerColor = Color(0xFFFFCDD2),
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                errorIndicatorColor = Color.Transparent
+            ),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = if (label.contains("Email", ignoreCase = true)) KeyboardType.Email else KeyboardType.Text
+            )
+        )
+        if (isError && errorMessage != null) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        }
+    }
 }
 
 @Composable
 private fun VCardForm(
-    name: String,
-    onNameChange: (String) -> Unit,
+    firstName: String,
+    onFirstNameChange: (String) -> Unit,
+    lastName: String,
+    onLastNameChange: (String) -> Unit,
     phone: String,
     onPhoneChange: (String) -> Unit,
     email: String,
@@ -234,38 +322,118 @@ private fun VCardForm(
     address: String,
     onAddressChange: (String) -> Unit,
     website: String,
-    onWebsiteChange: (String) -> Unit
+    onWebsiteChange: (String) -> Unit,
+    touchedFirstName: Boolean,
+    onFirstNameFocusLost: () -> Unit,
+    touchedLastName: Boolean,
+    onLastNameFocusLost: () -> Unit,
+    touchedPhone: Boolean,
+    onPhoneFocusLost: () -> Unit,
+    touchedEmail: Boolean,
+    onEmailFocusLost: () -> Unit,
 ) {
-    Column {
-        TextField(value = name, onValueChange = onNameChange, label = { Text("Nome completo*") }, placeholder = { Text("Mario Rossi") }, modifier = Modifier.fillMaxWidth())
-        Spacer(modifier = Modifier.height(8.dp))
-        TextField(value = phone, onValueChange = onPhoneChange, label = { Text("Telefono*") }, placeholder = { Text("1234567890") }, modifier = Modifier.fillMaxWidth())
-        Spacer(modifier = Modifier.height(8.dp))
-        TextField(value = email, onValueChange = onEmailChange, label = { Text("Email*") }, placeholder = { Text("mario@example.com") }, modifier = Modifier.fillMaxWidth())
-        Spacer(modifier = Modifier.height(8.dp))
-        TextField(value = organization, onValueChange = onOrganizationChange, label = { Text("Organizzazione") }, placeholder = { Text("Nome Azienda") }, modifier = Modifier.fillMaxWidth())
-        Spacer(modifier = Modifier.height(8.dp))
-        TextField(value = title, onValueChange = onTitleChange, label = { Text("Titolo") }, placeholder = { Text("Manager") }, modifier = Modifier.fillMaxWidth())
-        Spacer(modifier = Modifier.height(8.dp))
-        TextField(value = address, onValueChange = onAddressChange, label = { Text("Indirizzo") }, placeholder = { Text("Via Roma 1, Milano") }, modifier = Modifier.fillMaxWidth())
-        Spacer(modifier = Modifier.height(8.dp))
-        TextField(value = website, onValueChange = onWebsiteChange, label = { Text("Sito web") }, placeholder = { Text("https://www.example.com") }, modifier = Modifier.fillMaxWidth())
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        InputField(
+            label = "Nome*",
+            placeholder = "Mario",
+            value = firstName,
+            onValueChange = onFirstNameChange,
+            isError = touchedFirstName && firstName.isBlank(),
+            errorMessage = if (touchedFirstName && firstName.isBlank()) "Campo obbligatorio" else null,
+            onFocusLost = onFirstNameFocusLost
+        )
+        InputField(
+            label = "Cognome*",
+            placeholder = "Rossi",
+            value = lastName,
+            onValueChange = onLastNameChange,
+            isError = touchedLastName && lastName.isBlank(),
+            errorMessage = if (touchedLastName && lastName.isBlank()) "Campo obbligatorio" else null,
+            onFocusLost = onLastNameFocusLost
+        )
+        InputField(
+            label = "Telefono*",
+            placeholder = "3437674456",
+            value = phone,
+            onValueChange = onPhoneChange,
+            isError = touchedEmail && (!isValidEmail(email) || email.isBlank()),
+            errorMessage = when {
+                touchedPhone && phone.isBlank() -> "Campo obbligatorio"
+                touchedPhone && !isValidPhone(phone) -> "Formato telefono non valido"
+                else -> null
+            },
+            onFocusLost = onPhoneFocusLost
+        )
+        InputField(
+            label = "Email*",
+            placeholder = "mario@example.com",
+            value = email,
+            onValueChange = onEmailChange,
+            isError = touchedEmail && (!isValidPhone(phone)||email.isBlank()) ,
+            errorMessage = when {
+                touchedEmail && email.isBlank() -> "Campo obbligatorio"
+                touchedEmail && !isValidEmail(email) -> "Formato email non valido"
+                else -> null
+            },
+            onFocusLost = onEmailFocusLost
+        )
+        InputField(
+            label = "Organizzazione",
+            placeholder = "Nome Azienda",
+            value = organization,
+            onValueChange = onOrganizationChange,
+            isError = false,
+            errorMessage = null,
+            onFocusLost = {}
+        )
+        InputField(
+            label = "Titolo",
+            placeholder = "Manager",
+            value = title,
+            onValueChange = onTitleChange,
+            isError = false,
+            errorMessage = null,
+            onFocusLost = {}
+        )
+        InputField(
+            label = "Indirizzo",
+            placeholder = "Via Roma 1, Milano",
+            value = address,
+            onValueChange = onAddressChange,
+            isError = false,
+            errorMessage = null,
+            onFocusLost = {}
+        )
+        InputField(
+            label = "Sito web",
+            placeholder = "https://www.example.com",
+            value = website,
+            onValueChange = onWebsiteChange,
+            isError = false,
+            errorMessage = null,
+            onFocusLost = {}
+        )
     }
 }
 
 private fun createVCardMessageOrNull(
-    name: String,
+    firstName: String,
+    lastName: String,
     phone: String,
     email: String,
     organization: String,
     title: String,
     address: String,
     website: String
-) = if (name.isBlank() || phone.isBlank() || email.isBlank()) {
-    null
-} else {
-    NFCWriter.createVCardMessage(
-        name = name,
+): NdefMessage? {
+    if (firstName.isBlank() || lastName.isBlank() || phone.isBlank() || email.isBlank()) {
+        return null
+    }
+    if (!isValidPhone(phone) || !isValidEmail(email)) {
+        return null
+    }
+    return NFCWriter.createVCardMessage(
+        name = "$firstName $lastName",
         phone = phone,
         email = email,
         organization = organization.takeIf { it.isNotBlank() },
@@ -275,13 +443,21 @@ private fun createVCardMessageOrNull(
     )
 }
 
+
 private fun isWriteEnabled(
     type: String,
     data: String,
-    name: String,
+    firstName: String,
+    lastName: String,
     phone: String,
     email: String
 ) = when (type) {
-    "vcard" -> name.isNotBlank() && phone.isNotBlank() && email.isNotBlank()
+    "vcard" -> firstName.isNotBlank()
+            && lastName.isNotBlank()
+            && phone.isNotBlank()
+            && email.isNotBlank()
+            && isValidPhone(phone)
+            && isValidEmail(email)
+
     else -> data.isNotBlank()
 }

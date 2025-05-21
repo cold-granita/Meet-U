@@ -23,7 +23,7 @@ fun MyApplicationTheme(
         darkColorScheme(
             primary = Color(0xFF86D7FC),
             secondary = Color(0xFF0364DA),
-            tertiary = Color(0xFF0057B3)
+            tertiary = Color(0xFF0057B3),
         )
     } else {
         lightColorScheme(

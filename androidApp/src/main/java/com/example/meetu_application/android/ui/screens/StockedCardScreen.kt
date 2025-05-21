@@ -30,8 +30,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavHostController
 import com.example.meetu_application.android.data.model.Card
-import com.example.meetu_application.android.ui.components.CardView
+import com.example.meetu_application.android.ui.components.ClickableCard
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -39,6 +40,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun StackedCardScreen(
     cards: List<Card>,
+    navController: NavHostController,
     onAddClick: () -> Unit,
     onExpandToWallet: () -> Unit
 ) {
@@ -75,16 +77,16 @@ fun StackedCardScreen(
                 }
         ) {
             preferredCard?.let {
-                CardView(
-                    card = it,
-                    isPreferred = true,
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(top = 32.dp)
-                        .fillMaxWidth(0.9f)
-                        .height(180.dp)
-                        .zIndex(2f)
-                )
+                    ClickableCard(
+                        card = it,
+                        navController = navController, // 👈 importante
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 32.dp)
+                            .fillMaxWidth(0.9f)
+                            .height(200.dp)
+                            .zIndex(2f)
+                    )
             }
             if(cards.isEmpty()){
                 FloatingActionButton(
@@ -134,18 +136,18 @@ fun StackedCardScreen(
                     )
                     val bottomAlpha = (1f - index / 10f).coerceIn(0.2f, 1f) // Più alto è l'indice, più trasparente in basso
                     val contentAlpha = (1f - index / 8f).coerceIn(0.1f, 1f) // Dissolvo il contenuto (scritte)
-                    CardView(
+                    ClickableCard(
                         card = card,
+                        navController = navController,
                         modifier = Modifier
                             .align(Alignment.TopCenter)
                             .offset(y = offsetY)
                             .fillMaxWidth(0.9f)
-                            .height(140.dp)
+                            .height(160.dp)
                             .graphicsLayer { alpha = alphaValue }
                             .zIndex(-index.toFloat()),
                         bottomGradientAlpha = bottomAlpha,
                         contentAlpha = contentAlpha
-
                     )
                 }
             }

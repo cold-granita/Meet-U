@@ -9,6 +9,7 @@ import android.nfc.tech.Ndef
 import android.nfc.tech.NdefFormatable
 import android.os.Bundle
 import android.util.Log
+import com.example.meetu_application.android.data.utils.vibrateDevice
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -51,6 +52,7 @@ class NFCWriter(private val activity: Activity, private val callback: NFCWriteCa
                 if (ndef.isWritable && size <= ndef.maxSize) {
                     ndef.writeNdefMessage(writeMessage)
                     Log.d("NFCWriter", "Scrittura completata (${size} bytes)")
+                    vibrateDevice(activity)
                     callback?.onWriteSuccess()
                 } else {
                     val error = "Messaggio troppo grande per il tag"
@@ -76,6 +78,7 @@ class NFCWriter(private val activity: Activity, private val callback: NFCWriteCa
                     formatable.connect()
                     formatable.format(writeMessage)
                     Log.d("NFCWriter", "Tag formattato e scritto con successo")
+                    vibrateDevice(activity)
                 } catch (e: Exception) {
                     Log.e("NFCWriter", "Errore formattazione: ${e.message}", e)
                 } finally {

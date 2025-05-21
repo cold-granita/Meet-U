@@ -1,11 +1,13 @@
 package com.example.meetu_application.android.data.nfc
 
 import android.app.Activity
+import android.content.Context
 import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.Ndef
 import android.os.Bundle
+import com.example.meetu_application.android.data.utils.vibrateDevice
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -13,7 +15,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
-class NFCReader : NfcAdapter.ReaderCallback {
+class NFCReader(private val context: Context) : NfcAdapter.ReaderCallback {
     private var nfcAdapter: NfcAdapter? = null
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -47,11 +49,14 @@ class NFCReader : NfcAdapter.ReaderCallback {
 
         if (ndefMessage != null) {
             for (record in ndefMessage.records) {
-                val payload = String(record.payload, Charsets.UTF_8)
+                val payload = record.payload
+                val languageCodeLength = payload[0].toInt() and 0x3F
+                val text = String(payload, 1 + languageCodeLength, payload.size - 1 - languageCodeLength, Charsets.UTF_8)
                 scope.launch {
-                    _tagData.emit(payload)
+                    _tagData.emit(text)
                 }
             }
+            vibrateDevice(context)
         } else {
             scope.launch {
                 _tagData.emit("Nessun messaggio NDEF trovato.")

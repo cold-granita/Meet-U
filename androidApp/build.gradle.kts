@@ -41,6 +41,8 @@ dependencies {
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
+    implementation(libs.androidx.material3.v120)
+
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose.android)
     implementation(libs.androidx.core.ktx)
@@ -51,7 +53,6 @@ dependencies {
     implementation (libs.accompanist.navigation.animation)
     implementation(libs.androidx.animation.v170beta01)
     implementation(libs.androidx.animation.graphics)
-
 
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.navigation.compose)

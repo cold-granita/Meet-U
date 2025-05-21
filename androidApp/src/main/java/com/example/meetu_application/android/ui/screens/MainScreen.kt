@@ -7,7 +7,6 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -83,6 +82,7 @@ fun MainScreen(navController: NavHostController) {
         ) {
             StackedCardScreen(
                 cards = cards,
+                navController = navController,
                 onAddClick = { showDialog = true },
                 onExpandToWallet = {
                     Toast.makeText(context, "Navigazione wallet", Toast.LENGTH_SHORT).show()
@@ -91,9 +91,8 @@ fun MainScreen(navController: NavHostController) {
 
 
             )
-            
+
             Row(
-                horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -101,18 +100,25 @@ fun MainScreen(navController: NavHostController) {
                     .padding(bottom = 16.dp)
             ) {
                 IconWithLabel(
-                    Icons.Default.AccountBox, "Wallet",
-                    onClick = { navController.navigate("wallet") }
+                    icon = Icons.Default.AccountBox,
+                    label = "Wallet",
+                    onClick = { navController.navigate("wallet") },
+                    modifier = Modifier.weight(1f)
                 )
                 IconWithLabel(
-                    Icons.Default.AccountCircle, "NFC writer",
-                    onClick = { navController.navigate("nfcWriter") }
+                    icon = Icons.Default.AccountCircle,
+                    label = "NFC writer",
+                    onClick = { navController.navigate("nfcWriter") },
+                    modifier = Modifier.weight(1f)
                 )
                 IconWithLabel(
-                    Icons.Default.DateRange, "NFC reader",
-                    onClick = { navController.navigate("nfcReader")}
+                    icon = Icons.Default.DateRange,
+                    label = "NFC reader",
+                    onClick = { navController.navigate("nfcReader") },
+                    modifier = Modifier.weight(1f)
                 )
             }
+
 
             if (showDialog) {
                 AddCardDialog(

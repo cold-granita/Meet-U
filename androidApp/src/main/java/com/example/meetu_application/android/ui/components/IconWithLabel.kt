@@ -17,11 +17,12 @@ import com.example.meetu_application.android.ui.theme.colorMeetU
 fun IconWithLabel(
     icon: ImageVector,
     label: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.clickable(onClick = onClick)
+        modifier = modifier.clickable(onClick = onClick)
     ) {
         Icon(
             imageVector = icon,

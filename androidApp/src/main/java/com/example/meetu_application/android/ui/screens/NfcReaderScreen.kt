@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun NfcReaderScreen(navController: NavController) {
     val context = LocalContext.current
-    val nfcManager = remember { NFCReader() }
+    val nfcManager = remember { NFCReader(context) }
     var tagText by remember { mutableStateOf("Avvicina un tag NFC...") }
 
     LaunchedEffect(Unit) {
