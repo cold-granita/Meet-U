@@ -12,10 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,9 +22,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
+import com.example.meetu_application.android.R
 import com.example.meetu_application.android.data.storage.loadCardsFromWallet
 import com.example.meetu_application.android.data.storage.saveCardsToWallet
 import com.example.meetu_application.android.data.utils.ContactHelper
@@ -100,19 +98,19 @@ fun MainScreen(navController: NavHostController) {
                     .padding(bottom = 16.dp)
             ) {
                 IconWithLabel(
-                    icon = Icons.Default.AccountBox,
+                    icon = painterResource(id = R.drawable.wallet_icon),
                     label = "Wallet",
                     onClick = { navController.navigate("wallet") },
                     modifier = Modifier.weight(1f)
                 )
                 IconWithLabel(
-                    icon = Icons.Default.AccountCircle,
+                    icon = painterResource(id = R.drawable.nfc_writer_icon),
                     label = "NFC writer",
                     onClick = { navController.navigate("nfcWriter") },
                     modifier = Modifier.weight(1f)
                 )
                 IconWithLabel(
-                    icon = Icons.Default.DateRange,
+                    icon = painterResource(id = R.drawable.nfc_reader_icon),
                     label = "NFC reader",
                     onClick = { navController.navigate("nfcReader") },
                     modifier = Modifier.weight(1f)

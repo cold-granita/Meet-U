@@ -1,11 +1,14 @@
 package com.example.meetu_application.android.ui.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -26,11 +29,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -44,7 +47,6 @@ fun CardView(
     isPreferred: Boolean? = null,
     bottomGradientAlpha: Float = 1f,
     contentAlpha: Float = 1f
-
 ) {
     Box(
         modifier = modifier
@@ -57,7 +59,7 @@ fun CardView(
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(220.dp)
+                .defaultMinSize(minHeight = 220.dp)
         ) {
             Box(
                 modifier = Modifier
@@ -67,18 +69,15 @@ fun CardView(
                     .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                Color(0xFF5B84FF),                                   // colore alto
-                                Color(0xFF67BFFF).copy(alpha = bottomGradientAlpha)  // colore basso con alpha variabile
+                                Color(0xFF5B84FF),
+                                Color(0xFF67BFFF).copy(alpha = bottomGradientAlpha)
                             )
                         )
                     )
-
             ) {
-                // Canvas decorativa
-                androidx.compose.foundation.Canvas(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(220.dp)
+                // ✅ Canvas decorativa
+                Canvas(modifier = Modifier
+                    .fillMaxSize()
                 ) {
                     val canvasWidth = size.width
                     val canvasHeight = size.height
@@ -104,12 +103,20 @@ fun CardView(
                     )
                 }
 
+                // ✅ Overlay trasparente per effetto dissolvenza
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(Color.White.copy(alpha = 1f - contentAlpha))
+                        .clip(RoundedCornerShape(16.dp))
+                )
+
+                // ✅ Contenuto senza alpha diretta
                 Column(
                     modifier = Modifier
                         .padding(20.dp)
                         .fillMaxWidth()
                         .height(220.dp)
-                        .graphicsLayer { alpha = contentAlpha }
                 ) {
                     // Parte in alto: nome, cognome e titolo
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -130,7 +137,7 @@ fun CardView(
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    // Parte centrata verticalmente: gli altri campi
+                    // Parte in basso: altri campi
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         card.telephoneNumber?.takeIf { it.isNotBlank() }?.let {
                             IconTextRow(Icons.Default.Phone, it, Color.White)
@@ -144,25 +151,32 @@ fun CardView(
                         card.organization?.takeIf { it.isNotBlank() }?.let {
                             IconTextRow(Icons.Default.Home, it, Color.White)
                         }
-
                     }
                 }
-
             }
         }
     }
 }
 
 @Composable
-fun IconTextRow(icon: ImageVector, text: String, contentColor: Color = Color.White ) {
+fun IconTextRow(icon: ImageVector, text: String, contentColor: Color = Color.White) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = contentColor,
-            modifier = Modifier.size(15.dp)
+            modifier = Modifier
+                .size(15.dp)
+                .align(Alignment.CenterVertically)
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text, style = MaterialTheme.typography.bodySmall, color = contentColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = contentColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
     }
 }

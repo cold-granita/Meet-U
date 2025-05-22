@@ -14,8 +14,11 @@ navigationComposeJvmstubs = "2.9.0"
 navigationComposeAndroid = "2.9.0"
 composeAnimation = "1.8.1"
 navigationCompose = "2.9.0"
-coreKtx = "1.13.0"
+coreKtx = "1.16.0"
 appcompat = "1.7.0"
+securityCryptoKtx = "1.0.0"
+androidx-security-crypto-ktx = "1.0.0"
+securityCryptoKtxVersion = "1.1.0-alpha03"
 
 [libraries]
 accompanist-navigation-animation = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanistNavigationAnimation" }
@@ -25,6 +28,7 @@ accompanist-shared-element = { module = "com.google.accompanist:accompanist-shar
 androidx-animation-graphics = { module = "androidx.compose.animation:animation-graphics", version.ref = "composeAnimation" }
 androidx-animation-v170beta01 = { module = "androidx.compose.animation:animation", version.ref = "animation" }
 androidx-material3-v120 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+androidx-security-crypto-ktx-v110alpha03 = { module = "androidx.security:security-crypto-ktx", version.ref = "securityCryptoKtxVersion" }
 androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
 core = { module = "com.google.zxing:core", version.ref = "core" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
@@ -41,6 +45,9 @@ androidx-compose-animation = { group = "androidx.compose.animation", name = "ani
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-security-crypto-ktx = { group = "androidx.security", name = "security-crypto-ktx", version.ref = "securityCryptoKtxVersion" }
+
+
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }

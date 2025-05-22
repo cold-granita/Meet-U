@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
@@ -24,9 +25,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -79,12 +81,17 @@ fun StackedCardScreen(
             preferredCard?.let {
                     ClickableCard(
                         card = it,
-                        navController = navController, // 👈 importante
+                        navController = navController,
                         modifier = Modifier
                             .align(Alignment.TopCenter)
                             .padding(top = 32.dp)
                             .fillMaxWidth(0.9f)
                             .height(200.dp)
+                            .shadow(
+                                elevation = 12.dp,
+                                shape = RoundedCornerShape(16.dp), // usa lo stesso shape della Card
+                                clip = false              // non taglia i bordi
+                            )
                             .zIndex(2f)
                     )
             }
@@ -122,7 +129,7 @@ fun StackedCardScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.TopCenter)
-                    .padding(top = (32 + 180 - 100).dp)
+                    .padding(top = (32 + 180 - 150).dp) //lontananza dalla carta preferred
             ) {
                 otherCards.forEachIndexed { index, card ->
                     val offsetY = (index * 32).dp
@@ -143,8 +150,8 @@ fun StackedCardScreen(
                             .align(Alignment.TopCenter)
                             .offset(y = offsetY)
                             .fillMaxWidth(0.9f)
-                            .height(160.dp)
-                            .graphicsLayer { alpha = alphaValue }
+                            .height(200.dp)
+                            .alpha(alphaValue)
                             .zIndex(-index.toFloat()),
                         bottomGradientAlpha = bottomAlpha,
                         contentAlpha = contentAlpha

@@ -48,6 +48,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.security.crypto.ktx)
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.gson)
     implementation (libs.accompanist.navigation.animation)
@@ -59,4 +61,8 @@ dependencies {
 
     implementation (libs.core)
     implementation (libs.androidx.ui.graphics)
+
+    implementation(libs.androidx.security.crypto.ktx.v110alpha03)
+
+
 }

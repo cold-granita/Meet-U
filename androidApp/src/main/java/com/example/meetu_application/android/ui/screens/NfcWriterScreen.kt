@@ -353,10 +353,10 @@ private fun VCardForm(
         )
         InputField(
             label = "Telefono*",
-            placeholder = "3437674456",
+            placeholder = "0123456789",
             value = phone,
             onValueChange = onPhoneChange,
-            isError = touchedEmail && (!isValidEmail(email) || email.isBlank()),
+            isError = touchedPhone && (!isValidPhone(phone) || email.isBlank()),
             errorMessage = when {
                 touchedPhone && phone.isBlank() -> "Campo obbligatorio"
                 touchedPhone && !isValidPhone(phone) -> "Formato telefono non valido"
@@ -369,7 +369,7 @@ private fun VCardForm(
             placeholder = "mario@example.com",
             value = email,
             onValueChange = onEmailChange,
-            isError = touchedEmail && (!isValidPhone(phone)||email.isBlank()) ,
+            isError = touchedEmail && (!isValidEmail(email) ||email.isBlank()) ,
             errorMessage = when {
                 touchedEmail && email.isBlank() -> "Campo obbligatorio"
                 touchedEmail && !isValidEmail(email) -> "Formato email non valido"
