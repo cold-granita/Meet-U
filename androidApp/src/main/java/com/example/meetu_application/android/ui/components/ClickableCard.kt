@@ -21,9 +21,11 @@ fun ClickableCard(
             detectTapGestures(
                 onTap = {
                     navController.navigate("cardDetail/${card.id}")
+                    //(navController as? NavHostController)?.navigate("cardDetail/${card.id}")
                 },
                 onLongPress = {
                     navController.navigate("cardEdit/${card.id}")
+                    //(navController as? NavHostController)?.navigate("cardDetail/${card.id}")
                 }
             )
         },

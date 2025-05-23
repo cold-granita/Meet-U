@@ -104,7 +104,7 @@ class NFCWriter(private val activity: Activity, private val callback: NFCWriteCa
         return when (parts[0].lowercase(Locale.ROOT)) {
             "text" -> createTextMessage(parts[1])
             "url" -> createUriMessage(parts[1])
-            "vcard" -> createVCardMessage(parts[1])
+            "vcard" -> createVCardMessageFromString(parts[1])
             else -> null
         }
     }
@@ -121,7 +121,7 @@ class NFCWriter(private val activity: Activity, private val callback: NFCWriteCa
             return NdefMessage(arrayOf(record))
         }
 
-        fun createVCardMessage(vcard: String): NdefMessage {
+        private fun createVCardMessageFromString(vcard: String): NdefMessage {
             val payload = vcard.toByteArray(Charsets.UTF_8)
             val record = NdefRecord(
                 NdefRecord.TNF_MIME_MEDIA,
@@ -129,6 +129,7 @@ class NFCWriter(private val activity: Activity, private val callback: NFCWriteCa
                 ByteArray(0),
                 payload
             )
+            Log.d("VCardDebug", "COSA ESCE DALLA SECONDA FUnZIONE CREATEVCARD: ${NdefMessage(arrayOf(record))}")
             return NdefMessage(arrayOf(record))
         }
 
@@ -151,9 +152,14 @@ class NFCWriter(private val activity: Activity, private val callback: NFCWriteCa
                 if (!title.isNullOrBlank()) append("TITLE:$title\r\n")
                 if (!address.isNullOrBlank()) append("ADR:$address\r\n")
                 if (!website.isNullOrBlank()) append("URL:$website\r\n")
-                append("END:VCARD\r\n")
+                append("END:VCARD\n")
             }
-            return createVCardMessage(vcardBuilder.toString())
+            Log.d("VCardDebug",  "${vcardBuilder.take(20)}")
+            if (!vcardBuilder.startsWith("BEGIN:VCARD")) {
+                Log.e("VCardDebug", "VCARD non inizia con BEGIN:VCARD! Inizia con: ${vcardBuilder.take(20)}")
+            }
+
+            return createVCardMessageFromString(vcardBuilder.toString())
         }
     }
 }

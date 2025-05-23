@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -26,8 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -36,7 +32,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
@@ -46,6 +41,7 @@ import com.example.meetu_application.android.data.nfc.NFCWriteCallback
 import com.example.meetu_application.android.data.nfc.NFCWriter
 import com.example.meetu_application.android.data.utils.isValidEmail
 import com.example.meetu_application.android.data.utils.isValidPhone
+import com.example.meetu_application.android.ui.components.ValidatedInputField
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -151,7 +147,7 @@ fun NfcWriterScreen(
             }
 
             when (selectedType) {
-                "text" -> InputField(
+                "text" -> ValidatedInputField(
                     label = "Inserisci testo",
                     placeholder = "Ciao mondo",
                     value = inputData,
@@ -160,7 +156,7 @@ fun NfcWriterScreen(
                     errorMessage = null,
                     onFocusLost = {}
                 )
-                "url" -> InputField(
+                "url" -> ValidatedInputField(
                     label = "Inserisci link (https://...)",
                     placeholder = "https://www.example.com",
                     value = inputData,
@@ -251,60 +247,6 @@ fun NfcWriterScreen(
         }
     }
 }
-
-@Composable
-private fun InputField(
-    label: String,
-    placeholder: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    isError: Boolean,
-    errorMessage: String?,
-    onFocusLost: () -> Unit
-) {
-    var hasFocus by remember { mutableStateOf(false) }
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        TextField(
-            value = value,
-            onValueChange = onValueChange,
-            label = { Text(label) },
-            placeholder = { Text(placeholder) },
-            isError = isError,
-            modifier = Modifier
-                .fillMaxWidth()
-                .onFocusChanged { focusState ->
-                    if (hasFocus && !focusState.isFocused) {
-                        onFocusLost()
-                    }
-                    hasFocus = focusState.isFocused
-                },
-            shape = RoundedCornerShape(28.dp),
-            singleLine = false,
-
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color(0xFF9FD0FF),
-                unfocusedContainerColor = Color(0xFFC8E4FF),
-                errorContainerColor = Color(0xFFFFCDD2),
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                errorIndicatorColor = Color.Transparent
-            ),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = if (label.contains("Email", ignoreCase = true)) KeyboardType.Email else KeyboardType.Text
-            )
-        )
-        if (isError && errorMessage != null) {
-            Text(
-                text = errorMessage,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-            )
-        }
-    }
-}
-
 @Composable
 private fun VCardForm(
     firstName: String,
@@ -333,7 +275,7 @@ private fun VCardForm(
     onEmailFocusLost: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        InputField(
+        ValidatedInputField(
             label = "Nome*",
             placeholder = "Mario",
             value = firstName,
@@ -342,7 +284,7 @@ private fun VCardForm(
             errorMessage = if (touchedFirstName && firstName.isBlank()) "Campo obbligatorio" else null,
             onFocusLost = onFirstNameFocusLost
         )
-        InputField(
+        ValidatedInputField(
             label = "Cognome*",
             placeholder = "Rossi",
             value = lastName,
@@ -351,7 +293,7 @@ private fun VCardForm(
             errorMessage = if (touchedLastName && lastName.isBlank()) "Campo obbligatorio" else null,
             onFocusLost = onLastNameFocusLost
         )
-        InputField(
+        ValidatedInputField(
             label = "Telefono*",
             placeholder = "0123456789",
             value = phone,
@@ -362,9 +304,10 @@ private fun VCardForm(
                 touchedPhone && !isValidPhone(phone) -> "Formato telefono non valido"
                 else -> null
             },
-            onFocusLost = onPhoneFocusLost
+            onFocusLost = onPhoneFocusLost,
+            keyboardType = KeyboardType.Phone
         )
-        InputField(
+        ValidatedInputField(
             label = "Email*",
             placeholder = "mario@example.com",
             value = email,
@@ -375,9 +318,10 @@ private fun VCardForm(
                 touchedEmail && !isValidEmail(email) -> "Formato email non valido"
                 else -> null
             },
-            onFocusLost = onEmailFocusLost
+            onFocusLost = onEmailFocusLost,
+            keyboardType = KeyboardType.Email
         )
-        InputField(
+        ValidatedInputField(
             label = "Organizzazione",
             placeholder = "Nome Azienda",
             value = organization,
@@ -386,7 +330,7 @@ private fun VCardForm(
             errorMessage = null,
             onFocusLost = {}
         )
-        InputField(
+        ValidatedInputField(
             label = "Titolo",
             placeholder = "Manager",
             value = title,
@@ -395,7 +339,7 @@ private fun VCardForm(
             errorMessage = null,
             onFocusLost = {}
         )
-        InputField(
+        ValidatedInputField(
             label = "Indirizzo",
             placeholder = "Via Roma 1, Milano",
             value = address,
@@ -404,7 +348,7 @@ private fun VCardForm(
             errorMessage = null,
             onFocusLost = {}
         )
-        InputField(
+        ValidatedInputField(
             label = "Sito web",
             placeholder = "https://www.example.com",
             value = website,

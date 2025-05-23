@@ -3,6 +3,7 @@ package com.example.meetu_application.android.data.nfc
 import android.app.Activity
 import android.content.Context
 import android.nfc.NdefMessage
+import android.nfc.NdefRecord
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.Ndef
@@ -50,8 +51,28 @@ class NFCReader(private val context: Context) : NfcAdapter.ReaderCallback {
         if (ndefMessage != null) {
             for (record in ndefMessage.records) {
                 val payload = record.payload
-                val languageCodeLength = payload[0].toInt() and 0x3F
-                val text = String(payload, 1 + languageCodeLength, payload.size - 1 - languageCodeLength, Charsets.UTF_8)
+                val mimeType = String(record.type, Charsets.US_ASCII)
+                val text =
+                    if (record.tnf == NdefRecord.TNF_MIME_MEDIA && mimeType == "text/vcard") {
+                        // MIME type, no language code header
+                        String(payload, Charsets.UTF_8)
+                    } else if (record.tnf == NdefRecord.TNF_WELL_KNOWN && record.type.contentEquals(
+                            NdefRecord.RTD_TEXT
+                        )
+                    ) {
+                        // Well-known text type
+                        val languageCodeLength = payload[0].toInt() and 0x3F
+                        String(
+                            payload,
+                            1 + languageCodeLength,
+                            payload.size - 1 - languageCodeLength,
+                            Charsets.UTF_8
+                        )
+                    } else {
+                        // Fallback
+                        String(payload, Charsets.UTF_8)
+                    }
+
                 scope.launch {
                     _tagData.emit(text)
                 }
