@@ -1,5 +1,8 @@
-package com.example.meetu_application.android.ui.screens
+    package com.example.meetu_application.android.ui.screens
 
+import android.content.pm.PackageManager
+import android.nfc.NfcAdapter
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,7 +19,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Share
@@ -34,37 +36,67 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.meetu_application.android.R
 import com.example.meetu_application.android.data.model.Card
 import com.example.meetu_application.android.data.nfc.VCardApduService
+import com.example.meetu_application.android.data.storage.PreferenceManager
 import com.example.meetu_application.android.ui.theme.colorMeetU
 import com.example.meetu_application.android.utils.generateQRCode
 import com.example.meetu_application.android.utils.generateVCard
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+
+    @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardDetailScreen(card: Card, navController: NavController, onVCardReady: (String)->Unit) {
+        val context = LocalContext.current
+        Log.d("HCE",">>> CardDetailScreen creato con card: ${card.name} ${card.surname}")
 
-    val vCardString = remember(card) { generateVCard(card) }
-    val qrCodeBitmap = remember(vCardString) { generateQRCode(vCardString, size = 300) }
+        val vCardString = remember(card) { generateVCard(card) }
+        Log.d("HCE",">>> generateVCard restituisce: $vCardString")
+
+        val qrCodeBitmap = remember(vCardString) { generateQRCode(vCardString, size = 300) }
 
     LaunchedEffect(Unit) {
+        val nfcAdapter = NfcAdapter.getDefaultAdapter(context)
+        val isHceSupported = context.packageManager.hasSystemFeature(
+            PackageManager.FEATURE_NFC_HOST_CARD_EMULATION
+        )
+        Log.d("HCE", "Supporto HCE: $isHceSupported")
+
+        Log.d("HCE",">>> Imposto currentVCard in VCardApduService")
         VCardApduService.isSendingEnabled = true
         VCardApduService.currentVCard = vCardString
+        Log.d("HCE",">>> Current VCard set: $vCardString")
     }
 
     DisposableEffect(Unit) {
         onDispose {
+            Log.d("HCE",">>> Disposing CardDetailScreen, resetto VCard")
             VCardApduService.isSendingEnabled = false
+            VCardApduService.currentVCard = ""
         }
     }
+
+    val preferredCardId by PreferenceManager.getPreferredCardId(context).collectAsState(initial = null)
+    val isPreferred = preferredCardId == card.id
+    val coroutineScope = rememberCoroutineScope()
+
+
 
     Scaffold(
         topBar = {
@@ -75,6 +107,20 @@ fun CardDetailScreen(card: Card, navController: NavController, onVCardReady: (St
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Torna indietro"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        coroutineScope.launch {
+                            PreferenceManager.setPreferredCardId(context, card.id)
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(id = if (isPreferred) R.drawable.star else R.drawable.star_outlined),
+                            contentDescription = "Stella preferita",
+                            modifier = Modifier.size(27.dp),
+                            tint = Color(0xffffbb00)
                         )
                     }
                 }
@@ -118,8 +164,9 @@ fun CardDetailScreen(card: Card, navController: NavController, onVCardReady: (St
                     card.webSite?.takeIf { it.isNotBlank() }?.let {
                         DetailRow(icon = Icons.Default.Share, label = "Web Site", value = it)
                     }
+
                     card.organization?.takeIf { it.isNotBlank() }?.let {
-                        DetailRow(icon = Icons.Default.Home, label = "Organization", value = it)
+                        DetailRow(painterIcon = painterResource( R.drawable.company), label = "Organization", value = it)
                     }
                     card.title?.takeIf { it.isNotBlank() }?.let {
                         DetailRow(icon = Icons.Default.Face, label = "Title", value = it)
@@ -156,32 +203,41 @@ fun CardDetailScreen(card: Card, navController: NavController, onVCardReady: (St
     }
 }
 
-    @Composable
+@Composable
 fun DetailRow(
     icon: ImageVector? = null,
+    painterIcon: Painter? = null,
     label: String,
     value: String?
-) {
+    ) {
     if (value == null) return
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        if (icon != null) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = colorMeetU,
-                modifier = Modifier
-                    .size(24.dp)
-            )
-        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            when {
+                icon != null -> {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = label,
+                        tint = colorMeetU,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                painterIcon != null -> {
+                    Icon(
+                        painter = painterIcon,
+                        contentDescription = label,
+                        tint = colorMeetU,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
 
-        Column {
-            Text(text = label, style = MaterialTheme.typography.labelMedium, color = Color.Gray)
-            Text(text = value, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+            Column {
+                Text(text = label, style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+                Text(text = value, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+            }
         }
-    }
 }
-

@@ -3,6 +3,8 @@ accompanistNavigationAnimation = "0.32.0"
 agp = "8.8.2"
 animation = "1.7.0-beta01"
 core = "3.5.2"
+datastorePreferences = "1.1.7"
+datastorePreferencesVersion = "1.0.0"
 googleAccompanistNavigationAnimation = "<version>"
 gson = "2.10.1"
 kotlin = "2.1.0"
@@ -27,6 +29,12 @@ accompanist-navigation-material = { module = "com.google.accompanist:accompanist
 accompanist-shared-element = { module = "com.google.accompanist:accompanist-shared-element", version.ref = "googleAccompanistNavigationAnimation" }
 androidx-animation-graphics = { module = "androidx.compose.animation:animation-graphics", version.ref = "composeAnimation" }
 androidx-animation-v170beta01 = { module = "androidx.compose.animation:animation", version.ref = "animation" }
+androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastorePreferences" }
+androidx-datastore-core = { module = "androidx.datastore:datastore-core", version.ref = "datastorePreferences" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+androidx-datastore-preferences-v100 = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferencesVersion" }
+androidx-datastore-rxjava2 = { module = "androidx.datastore:datastore-rxjava2", version.ref = "datastorePreferences" }
+androidx-datastore-rxjava3 = { module = "androidx.datastore:datastore-rxjava3", version.ref = "datastorePreferences" }
 androidx-material3-v120 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 androidx-security-crypto-ktx-v110alpha03 = { module = "androidx.security:security-crypto-ktx", version.ref = "securityCryptoKtxVersion" }
 androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }

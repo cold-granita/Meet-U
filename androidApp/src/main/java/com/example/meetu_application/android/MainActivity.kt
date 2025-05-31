@@ -23,6 +23,7 @@ class MainActivity : ComponentActivity() {
                         statusCallback("Writer NFC pronto")
                       }  )
             }
+
         }
     }
 }

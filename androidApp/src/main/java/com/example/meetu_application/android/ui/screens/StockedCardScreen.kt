@@ -17,7 +17,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,10 +33,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import com.example.meetu_application.android.data.model.Card
+import com.example.meetu_application.android.data.storage.PreferenceManager
 import com.example.meetu_application.android.ui.components.ClickableCard
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -48,12 +53,35 @@ fun StackedCardScreen(
 ) {
     SharedTransitionLayout {
         val coroutineScope = rememberCoroutineScope()
-        val preferredCard = cards.find { it.isPreferred } ?: cards.firstOrNull()
-        val otherCards = cards.filter { it != preferredCard }
+        val context = LocalContext.current
+
+        var isReady by remember { mutableStateOf(false) }
+
+        val preferredCardId by PreferenceManager.getPreferredCardId(context).collectAsState(initial = null)
+
+        // Ritarda la UI finché cards è popolata e preferredCardId ha emesso almeno una volta
+        LaunchedEffect(cards, preferredCardId) {
+            if (cards.isNotEmpty()) {
+                delay(100) // extra delay per evitare glitch visivo
+                isReady = true
+            }
+        }
+
+        if (!isReady) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                androidx.compose.material3.CircularProgressIndicator()
+            }
+            return@SharedTransitionLayout
+        }
+
+        val preferredCard = cards.find { it.id == preferredCardId } ?: cards.firstOrNull()
+        val otherCards = cards.filter { it.id != preferredCard?.id }
 
         var offsetYTotal by remember { mutableStateOf(0f) }
         var expanded by remember { mutableStateOf(false) }
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -108,8 +136,10 @@ fun StackedCardScreen(
                     Icon(Icons.Default.Add, contentDescription = "Aggiungi", tint = Color.White)
                 }
             }else{
-                val visibleCardCount = otherCards.size.coerceAtMost(8)
-                val fabVerticalOffset = (visibleCardCount * 32).dp + 280.dp
+                val visibleCardCount = otherCards.size.coerceAtMost(7)
+                val baseOffset = (visibleCardCount * 32).dp + 280.dp
+                val fabVerticalOffset = if (otherCards.size > 7) baseOffset + 24.dp else baseOffset
+
                 FloatingActionButton(
                     onClick = onAddClick,
                     containerColor = com.example.meetu_application.android.ui.theme.colorMeetU,
@@ -122,6 +152,7 @@ fun StackedCardScreen(
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Aggiungi", tint = Color.White)
                 }
+
             }
 
 
@@ -155,6 +186,18 @@ fun StackedCardScreen(
                             .zIndex(-index.toFloat()),
                         bottomGradientAlpha = bottomAlpha,
                         contentAlpha = contentAlpha
+                    )
+                }
+                // Mostra "+X carte" se ci sono più di 7
+                if (otherCards.size > 7) {
+                    val extraCards = otherCards.size - 7
+                    androidx.compose.material3.Text(
+                        text = "+$extraCards carte",
+                        color = Color.LightGray,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = ((7 * 32) + 200 + 8).dp) // posizionato sotto l'ultima carta visibile
                     )
                 }
             }

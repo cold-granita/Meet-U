@@ -39,8 +39,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.meetu_application.android.data.nfc.NFCWriteCallback
 import com.example.meetu_application.android.data.nfc.NFCWriter
+import com.example.meetu_application.android.data.utils.emailValidator
 import com.example.meetu_application.android.data.utils.isValidEmail
 import com.example.meetu_application.android.data.utils.isValidPhone
+import com.example.meetu_application.android.data.utils.phoneValidator
+import com.example.meetu_application.android.data.utils.requiredValidator
 import com.example.meetu_application.android.ui.components.ValidatedInputField
 
 
@@ -152,8 +155,8 @@ fun NfcWriterScreen(
                     placeholder = "Ciao mondo",
                     value = inputData,
                     onValueChange = { inputData = it },
-                    isError = false,
-                    errorMessage = null,
+                    validator = requiredValidator("Testo"),
+                    touched = touchedFirstName,
                     onFocusLost = {}
                 )
                 "url" -> ValidatedInputField(
@@ -161,8 +164,8 @@ fun NfcWriterScreen(
                     placeholder = "https://www.example.com",
                     value = inputData,
                     onValueChange = { inputData = it },
-                    isError = false,
-                    errorMessage = null,
+                    validator = requiredValidator("Url"),
+                    touched = touchedFirstName,
                     onFocusLost = {}
                 )
                 "vcard" -> VCardForm(
@@ -280,44 +283,39 @@ private fun VCardForm(
             placeholder = "Mario",
             value = firstName,
             onValueChange = onFirstNameChange,
-            isError = touchedFirstName && firstName.isBlank(),
-            errorMessage = if (touchedFirstName && firstName.isBlank()) "Campo obbligatorio" else null,
+            validator = requiredValidator("Nome"),
+            touched = touchedFirstName,
             onFocusLost = onFirstNameFocusLost
         )
+
         ValidatedInputField(
             label = "Cognome*",
             placeholder = "Rossi",
             value = lastName,
             onValueChange = onLastNameChange,
-            isError = touchedLastName && lastName.isBlank(),
-            errorMessage = if (touchedLastName && lastName.isBlank()) "Campo obbligatorio" else null,
+            validator = requiredValidator("Cognome"),
+            touched = touchedLastName,
             onFocusLost = onLastNameFocusLost
         )
+
         ValidatedInputField(
             label = "Telefono*",
             placeholder = "0123456789",
             value = phone,
             onValueChange = onPhoneChange,
-            isError = touchedPhone && (!isValidPhone(phone) || email.isBlank()),
-            errorMessage = when {
-                touchedPhone && phone.isBlank() -> "Campo obbligatorio"
-                touchedPhone && !isValidPhone(phone) -> "Formato telefono non valido"
-                else -> null
-            },
+            validator = phoneValidator(),
+            touched = touchedPhone,
             onFocusLost = onPhoneFocusLost,
             keyboardType = KeyboardType.Phone
         )
+
         ValidatedInputField(
             label = "Email*",
             placeholder = "mario@example.com",
             value = email,
             onValueChange = onEmailChange,
-            isError = touchedEmail && (!isValidEmail(email) ||email.isBlank()) ,
-            errorMessage = when {
-                touchedEmail && email.isBlank() -> "Campo obbligatorio"
-                touchedEmail && !isValidEmail(email) -> "Formato email non valido"
-                else -> null
-            },
+            validator = emailValidator(),
+            touched = touchedEmail,
             onFocusLost = onEmailFocusLost,
             keyboardType = KeyboardType.Email
         )
@@ -326,8 +324,8 @@ private fun VCardForm(
             placeholder = "Nome Azienda",
             value = organization,
             onValueChange = onOrganizationChange,
-            isError = false,
-            errorMessage = null,
+            validator = { null },
+            touched = false,
             onFocusLost = {}
         )
         ValidatedInputField(
@@ -335,8 +333,8 @@ private fun VCardForm(
             placeholder = "Manager",
             value = title,
             onValueChange = onTitleChange,
-            isError = false,
-            errorMessage = null,
+            validator = { null },
+            touched = false,
             onFocusLost = {}
         )
         ValidatedInputField(
@@ -344,8 +342,8 @@ private fun VCardForm(
             placeholder = "Via Roma 1, Milano",
             value = address,
             onValueChange = onAddressChange,
-            isError = false,
-            errorMessage = null,
+            validator = { null },
+            touched = false,
             onFocusLost = {}
         )
         ValidatedInputField(
@@ -353,8 +351,8 @@ private fun VCardForm(
             placeholder = "https://www.example.com",
             value = website,
             onValueChange = onWebsiteChange,
-            isError = false,
-            errorMessage = null,
+            validator = { null },
+            touched = false,
             onFocusLost = {}
         )
     }

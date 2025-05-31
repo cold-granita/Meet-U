@@ -12,7 +12,6 @@ data class Card(
     val title: String? = null,
     val webSite: String? = null,
     val address: String? = null,
-    val isPreferred: Boolean = false
 ) {
     // Costruttore da input manuale
     companion object {

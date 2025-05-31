@@ -1,3 +1,4 @@
+package com.example.meetu_application.android.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,7 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,14 +28,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight.Companion.W700
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.meetu_application.android.data.model.Card
-import com.example.meetu_application.android.data.utils.isValidEmail
-import com.example.meetu_application.android.data.utils.isValidPhone
-import com.example.meetu_application.android.ui.components.ValidatedInputField
+import com.example.meetu_application.android.data.utils.emailValidator
+import com.example.meetu_application.android.data.utils.phoneValidator
+import com.example.meetu_application.android.data.utils.requiredValidator
 
 @Composable
 fun AddCardDialog(
@@ -52,131 +51,121 @@ fun AddCardDialog(
     var webSite by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
 
+    // Stati touched per validazione
     var touchedName by remember { mutableStateOf(false) }
     var touchedSurname by remember { mutableStateOf(false) }
     var touchedPhone by remember { mutableStateOf(false) }
     var touchedEmail by remember { mutableStateOf(false) }
 
-    val isFormValid = name.isNotBlank() &&
-            surname.isNotBlank() &&
-            isValidPhone(phone) &&
-            isValidEmail(email)
+    // Prima definisco se ogni campo è valido
+    val isNameValid = requiredValidator("Nome")(name) == null
+    val isSurnameValid = requiredValidator("Cognome")(surname) == null
+    val isPhoneValid = phoneValidator()(phone) == null
+    val isEmailValid = emailValidator()(email) == null
 
+    // Controllo complessivo
+    val isFormValid = isNameValid && isSurnameValid && isPhoneValid && isEmailValid
 
     val scrollState = rememberScrollState()
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = MaterialTheme.shapes.medium,
-            tonalElevation = 10.dp,
+            tonalElevation = 8.dp,
             modifier = Modifier
-                .padding(20.dp)
-                .heightIn(max = 520.dp),
-            color = Color.White
+                .padding(16.dp)
+                .heightIn(max = 520.dp)
         ) {
             Column(
                 modifier = Modifier
-                    .padding(20.dp)
+                    .padding(16.dp)
                     .fillMaxWidth()
                     .verticalScroll(scrollState), // Scroll verticale
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "Aggiungi Card",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = W700,
-                    color = MaterialTheme.colorScheme.secondary
-                    )
+                Text(text = "Aggiungi Card", style = MaterialTheme.typography.titleLarge)
 
-                val textFieldColors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFF9FD0FF),
-                    unfocusedContainerColor = Color(0xFFC8E4FF),
-                    errorContainerColor = Color(0xFFFFCDD2),
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    errorIndicatorColor = Color.Transparent
-                )
                 ValidatedInputField(
-                    label = "Nome*",
                     value = name,
                     onValueChange = { name = it },
-                    isError = touchedName && name.isBlank(),
-                    errorMessage = if (touchedName && name.isBlank()) "Campo obbligatorio" else null,
+                    label = "Nome*",
+                    validator = requiredValidator("Nome"),
+                    touched = touchedName,
                     onFocusLost = { touchedName = true },
-                    placeholder = "Mario",
+                    modifier = Modifier.fillMaxWidth()
                 )
+
                 ValidatedInputField(
-                    label = "Cognome*",
                     value = surname,
                     onValueChange = { surname = it },
-                    isError = touchedSurname && surname.isBlank(),
-                    errorMessage = if (touchedSurname && surname.isBlank()) "Campo obbligatorio" else null,
+                    label = "Cognome*",
+                    validator = requiredValidator("Cognome"),
+                    touched = touchedSurname,
                     onFocusLost = { touchedSurname = true },
-                    placeholder = "Rossi",
+                    modifier = Modifier.fillMaxWidth()
                 )
+
                 ValidatedInputField(
-                    label = "Telefono*",
-                    placeholder = "0123456789",
                     value = phone,
                     onValueChange = { phone = it },
-                    isError = touchedPhone && (!isValidPhone(phone) || email.isBlank()),
-                    errorMessage = when {
-                        touchedPhone && phone.isBlank() -> "Campo obbligatorio"
-                        touchedPhone && !isValidPhone(phone) -> "Formato telefono non valido"
-                        else -> null
-                    },
+                    label = "Telefono*",
+                    validator = phoneValidator(),
+                    touched = touchedPhone,
                     onFocusLost = { touchedPhone = true },
-                    keyboardType = KeyboardType.Phone
+                    keyboardType = KeyboardType.Number,
+                    modifier = Modifier.fillMaxWidth()
                 )
+
                 ValidatedInputField(
-                    label = "Email*",
-                    placeholder = "mario@example.com",
                     value = email,
                     onValueChange = { email = it },
-                    isError = touchedEmail && (!isValidEmail(email) ||email.isBlank()) ,
-                    errorMessage = when {
-                        touchedEmail && email.isBlank() -> "Campo obbligatorio"
-                        touchedEmail && !isValidEmail(email) -> "Formato email non valido"
-                        else -> null
-                    },
-                    onFocusLost = {  touchedEmail = true},
-                    keyboardType = KeyboardType.Email
+                    label = "Email*",
+                    validator = emailValidator(),
+                    touched = touchedEmail,
+                    onFocusLost = { touchedEmail = true },
+                    keyboardType = KeyboardType.Email,
+                    modifier = Modifier.fillMaxWidth()
                 )
+
                 ValidatedInputField(
-                    label = "Organizzazione",
-                    placeholder = "Nome Azienda",
                     value = organization,
                     onValueChange = { organization = it },
-                    isError = false,
-                    errorMessage = null,
-                    onFocusLost = {}
+                    label = "Azienda",
+                    validator = null,
+                    touched = false,
+                    onFocusLost = {},
+                    modifier = Modifier.fillMaxWidth()
                 )
+
                 ValidatedInputField(
-                    label = "Titolo",
-                    placeholder = "Manager",
                     value = title,
                     onValueChange = { title = it },
-                    isError = false,
-                    errorMessage = null,
-                    onFocusLost = {}
+                    label = "Titolo",
+                    validator = null,
+                    touched = false,
+                    onFocusLost = {},
+                    modifier = Modifier.fillMaxWidth()
                 )
+
                 ValidatedInputField(
-                    label = "Indirizzo",
-                    placeholder = "Via Roma 1, Milano",
-                    value = address,
-                    onValueChange = { address = it },
-                    isError = false,
-                    errorMessage = null,
-                    onFocusLost = {}
-                )
-                ValidatedInputField(
-                    label = "Sito web",
-                    placeholder = "https://www.example.com",
                     value = webSite,
                     onValueChange = { webSite = it },
-                    isError = false,
-                    errorMessage = null,
-                    onFocusLost = {}
+                    label = "Sito Web",
+                    validator = null,
+                    touched = false,
+                    onFocusLost = {},
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                ValidatedInputField(
+                    value = address,
+                    onValueChange = { address = it },
+                    label = "Indirizzo",
+                    validator = null,
+                    touched = false,
+                    onFocusLost = {},
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -192,8 +181,9 @@ fun AddCardDialog(
                     Icon(Icons.Default.Phone, contentDescription = "Aggiungi", tint = Color.White)
                     Text(" Aggiungi da Rubrica")
                 }
+
                 Button(
-                    onClick = {
+                     onClick = {
                         val newCard = Card.fromInput(
                             name,
                             surname,
@@ -209,28 +199,26 @@ fun AddCardDialog(
                     enabled = isFormValid,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.secondary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary,
-                        disabledContainerColor = Color.LightGray,
-                        disabledContentColor = Color.DarkGray,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
                     ),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    val iconTint = if (isFormValid) Color.White else Color.Gray
-                    val textColor = if (isFormValid) Color.White else Color.Gray
-                    Icon(Icons.Default.Check, contentDescription = "Aggiungi", tint = iconTint)
-                    Text(" Crea Card", color = textColor)
+                    Icon(Icons.Default.Check, contentDescription = "Crea card", tint = Color.White)
+                    Text(" Crea Card")
                 }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Annulla", color = Color.Red)
+                        Text(
+                            text = "Annulla",
+                            color= Color.Red
+                        )
                     }
                 }
             }
         }
     }
 }
-

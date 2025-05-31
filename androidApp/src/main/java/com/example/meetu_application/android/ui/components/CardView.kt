@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
@@ -34,17 +33,19 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.meetu_application.android.R
 import com.example.meetu_application.android.data.model.Card
 
 @Composable
 fun CardView(
     card: Card,
     modifier: Modifier = Modifier,
-    isPreferred: Boolean? = null,
     bottomGradientAlpha: Float = 1f,
     contentAlpha: Float = 1f
 ) {
@@ -103,7 +104,7 @@ fun CardView(
                     )
                 }
 
-                // ✅ Overlay trasparente per effetto dissolvenza
+                // Overlay trasparente per effetto dissolvenza
                 Box(
                     modifier = Modifier
                         .matchParentSize()
@@ -149,7 +150,7 @@ fun CardView(
                             IconTextRow(Icons.Default.Share, it, Color.White)
                         }
                         card.organization?.takeIf { it.isNotBlank() }?.let {
-                            IconTextRow(Icons.Default.Home, it, Color.White)
+                            IconTextRow(painterResource(id = R.drawable.company), it, Color.White)
                         }
                     }
                 }
@@ -168,6 +169,27 @@ fun IconTextRow(icon: ImageVector, text: String, contentColor: Color = Color.Whi
             modifier = Modifier
                 .size(15.dp)
                 .align(Alignment.CenterVertically)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = contentColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+fun IconTextRow(painter: Painter, text: String, contentColor: Color = Color.White) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            painter = painter,
+            contentDescription = null,
+            tint = contentColor,
+            modifier = Modifier.size(15.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(

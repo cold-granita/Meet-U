@@ -45,11 +45,8 @@ dependencies {
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose.android)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.security.crypto.ktx)
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.gson)
     implementation (libs.accompanist.navigation.animation)
@@ -63,4 +60,7 @@ dependencies {
     implementation (libs.androidx.ui.graphics)
 
     implementation(libs.androidx.security.crypto.ktx.v110alpha03)
+
+    implementation(libs.androidx.datastore)
+    implementation(libs.androidx.datastore.preferences)
 }

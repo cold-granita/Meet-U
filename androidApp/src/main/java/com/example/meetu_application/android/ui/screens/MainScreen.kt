@@ -1,6 +1,5 @@
 package com.example.meetu_application.android.ui.screens
 
-import AddCardDialog
 import android.Manifest
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -30,6 +29,7 @@ import com.example.meetu_application.android.R
 import com.example.meetu_application.android.data.storage.loadCardsFromWallet
 import com.example.meetu_application.android.data.storage.saveCardsToWallet
 import com.example.meetu_application.android.data.utils.ContactHelper
+import com.example.meetu_application.android.ui.components.AddCardDialog
 import com.example.meetu_application.android.ui.components.IconWithLabel
 
 @Composable

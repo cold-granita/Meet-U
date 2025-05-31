@@ -25,15 +25,17 @@ fun ValidatedInputField(
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
-    isError: Boolean,
-    errorMessage: String?,
     onFocusLost: () -> Unit,
     modifier: Modifier = Modifier,
     placeholder: String? = null,
     singleLine: Boolean = true,
-    keyboardType: KeyboardType = KeyboardType.Text
+    keyboardType: KeyboardType = KeyboardType.Text,
+    validator: ((String) -> String?)? = null,
+    touched: Boolean = true // controlla se mostrare l'errore solo dopo focus perso
 ) {
     var hasFocus by remember { mutableStateOf(false) }
+    val errorMessage = if (touched && validator != null) validator(value) else null
+    val isError = errorMessage != null
 
     Column(modifier = modifier) {
         TextField(
@@ -62,9 +64,9 @@ fun ValidatedInputField(
                 errorIndicatorColor = Color.Transparent
             )
         )
-        if (isError && errorMessage != null) {
+        if (isError) {
             Text(
-                text = errorMessage,
+                text = errorMessage!!,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(start = 16.dp, top = 4.dp)
