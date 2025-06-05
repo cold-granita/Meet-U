@@ -5,10 +5,12 @@ import android.nfc.NfcAdapter
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -42,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -54,6 +57,7 @@ import com.example.meetu_application.android.R
 import com.example.meetu_application.android.data.model.Card
 import com.example.meetu_application.android.data.nfc.VCardApduService
 import com.example.meetu_application.android.data.storage.PreferenceManager
+import com.example.meetu_application.android.ui.components.NfcWaveAnimation
 import com.example.meetu_application.android.ui.theme.colorMeetU
 import com.example.meetu_application.android.utils.generateQRCode
 import com.example.meetu_application.android.utils.generateVCard
@@ -136,6 +140,18 @@ fun CardDetailScreen(card: Card, navController: NavController, onVCardReady: (St
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)  // Altezza fissa per mostrare metà animazione
+                    .clipToBounds(), // Importantissimo per tagliare tutto ciò che esce
+                contentAlignment = Alignment.TopCenter
+            ) {
+                NfcWaveAnimation(
+                    modifier = Modifier.size(160.dp) // Dimensione totale animazione (più alta)
+                )
+            }
+            
             ElevatedCard(
                 shape = RoundedCornerShape(24.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
@@ -188,8 +204,6 @@ fun CardDetailScreen(card: Card, navController: NavController, onVCardReady: (St
                 Text(" Modifica la Card")
             }
 
-            //Spacer(modifier = Modifier.height(24.dp))
-
             qrCodeBitmap?.let {
                 Image(
                     bitmap = it,
@@ -212,7 +226,7 @@ fun DetailRow(
     ) {
     if (value == null) return
 
-        Row(
+    Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {

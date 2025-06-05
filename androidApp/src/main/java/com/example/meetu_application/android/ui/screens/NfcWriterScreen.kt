@@ -31,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -44,7 +45,9 @@ import com.example.meetu_application.android.data.utils.isValidEmail
 import com.example.meetu_application.android.data.utils.isValidPhone
 import com.example.meetu_application.android.data.utils.phoneValidator
 import com.example.meetu_application.android.data.utils.requiredValidator
+import com.example.meetu_application.android.data.utils.websiteValidator
 import com.example.meetu_application.android.ui.components.ValidatedInputField
+import com.example.meetu_application.android.ui.components.WriteStatusView
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,30 +72,36 @@ fun NfcWriterScreen(
     var address by remember { mutableStateOf("") }
     var website by remember { mutableStateOf("") }
 
+    //campo per URL
+    var website_url by remember { mutableStateOf("") }
+    var touchedWebSite by remember { mutableStateOf(false) }
+
     // Stati per validazione (se il campo è stato toccato e perso il focus)
     var touchedFirstName by remember { mutableStateOf(false) }
     var touchedLastName by remember { mutableStateOf(false) }
     var touchedPhone by remember { mutableStateOf(false) }
     var touchedEmail by remember { mutableStateOf(false) }
 
-    var writeStatus by remember { mutableStateOf("") }
+    var writeStatus by remember { mutableStateOf<WriteStatus>(WriteStatus.None) }
 
     val nfcWriter = remember {
         NFCWriter(activity, object : NFCWriteCallback {
             override fun onWriteSuccess() {
-                writeStatus = "✅ Tag scritto con successo!"
+                writeStatus = WriteStatus.Success("Tag scritto con successo!")
             }
 
             override fun onWriteError(error: String) {
-                writeStatus = "❌ Errore: $error"
+                writeStatus = WriteStatus.Error("Errore: $error")
             }
         })
     }
+
     LaunchedEffect(Unit) {
         onWriterReady(nfcWriter) { status ->
-            writeStatus = status
+            writeStatus = WriteStatus.Info(status)
         }
     }
+
 
     val scrollState = rememberScrollState()
 
@@ -123,7 +132,10 @@ fun NfcWriterScreen(
             Row {
                 listOf("text", "url", "vcard").forEach { type ->
                     OutlinedButton(
-                        onClick = { selectedType = type },
+                        onClick = {
+                            selectedType = type
+                            writeStatus = WriteStatus.Info("Writer NFC pronto")
+                                  },
                         modifier = Modifier
                             .padding(end = 8.dp)
                             .weight(1f),
@@ -155,18 +167,21 @@ fun NfcWriterScreen(
                     placeholder = "Ciao mondo",
                     value = inputData,
                     onValueChange = { inputData = it },
-                    validator = requiredValidator("Testo"),
-                    touched = touchedFirstName,
+                    validator = null,
+                    touched = false,
                     onFocusLost = {}
                 )
                 "url" -> ValidatedInputField(
-                    label = "Inserisci link (https://...)",
+                    label = "Sito web",
                     placeholder = "https://www.example.com",
-                    value = inputData,
-                    onValueChange = { inputData = it },
-                    validator = requiredValidator("Url"),
-                    touched = touchedFirstName,
-                    onFocusLost = {}
+                    value = website_url,
+                    onValueChange = {
+                        website_url = it
+                        if (!touchedWebSite) touchedWebSite = true
+                    },
+                    validator = websiteValidator(),
+                    touched = touchedWebSite,
+                    onFocusLost = { }
                 )
                 "vcard" -> VCardForm(
                     firstName = firstName,
@@ -200,7 +215,7 @@ fun NfcWriterScreen(
                 onClick = {
                     val message = when (selectedType) {
                         "text" -> NFCWriter.createTextMessage(inputData)
-                        "url" -> NFCWriter.createUriMessage(inputData)
+                        "url" -> NFCWriter.createUriMessage(website_url)
                         "vcard" -> createVCardMessageOrNull(
                             firstName,
                             lastName,
@@ -216,30 +231,28 @@ fun NfcWriterScreen(
 
                     if (message != null) {
                         nfcWriter.enableWriteMode(message)
-                        writeStatus = "Avvicina un tag NFC per scrivere..."
-                    } else if (writeStatus.isEmpty()) {
-                        writeStatus = "Formato non valido per il tipo selezionato."
+                        writeStatus = WriteStatus.Info("Avvicina un tag NFC per scrivere...")
+                    } else if (writeStatus is WriteStatus.Info && (writeStatus as WriteStatus.Info).message.isEmpty()) {
+                        writeStatus = WriteStatus.Info("Formato non valido per il tipo selezionato.")
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(60.dp),
-                enabled = isWriteEnabled(
-                    selectedType,
-                    inputData,
-                    firstName,
-                    lastName,
-                    phone,
-                    email
-                )
+                enabled = when (selectedType) {
+                    "vcard" -> isWriteEnabled(selectedType, "", firstName, lastName, phone, email)
+                    "url" -> isWriteEnabled(selectedType, website_url, "", "", "", "")
+                    else -> isWriteEnabled(selectedType, inputData, "", "", "", "")
+                }
+
             ) {
                 Text("Scrivi su tag NFC")
             }
-
-            Text(
-                text = writeStatus,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(top = 8.dp)
+            WriteStatusView(
+                status = writeStatus,
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .align(Alignment.CenterHorizontally)
             )
         }
     }
@@ -250,6 +263,15 @@ fun NfcWriterScreen(
         }
     }
 }
+
+sealed class WriteStatus {
+    data class Success(val message: String): WriteStatus()
+    data class Error(val message: String): WriteStatus()
+    data class Info(val message: String): WriteStatus()
+    object None: WriteStatus()
+}
+
+
 @Composable
 private fun VCardForm(
     firstName: String,
@@ -401,5 +423,6 @@ private fun isWriteEnabled(
             && isValidPhone(phone)
             && isValidEmail(email)
 
+    "url" -> data.isNotBlank() && websiteValidator()(data) == null
     else -> data.isNotBlank()
 }

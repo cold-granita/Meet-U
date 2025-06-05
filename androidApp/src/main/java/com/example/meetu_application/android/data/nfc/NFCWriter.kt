@@ -10,16 +10,12 @@ import android.nfc.tech.NdefFormatable
 import android.os.Bundle
 import android.util.Log
 import com.example.meetu_application.android.data.utils.vibrateDevice
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import java.util.Locale
 
 class NFCWriter(private val activity: Activity, private val callback: NFCWriteCallback? = null) : NfcAdapter.ReaderCallback {
 
     private var nfcAdapter: NfcAdapter? = null
     private var writeMessage: NdefMessage? = null
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     fun enableWriteMode(message: NdefMessage?) {
         writeMessage = message

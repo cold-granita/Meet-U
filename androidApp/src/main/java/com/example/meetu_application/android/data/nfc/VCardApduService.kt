@@ -35,7 +35,7 @@ class VCardApduService : HostApduService() {
         if (commandApdu.size >= SELECT_APDU.size &&
             commandApdu.sliceArray(0 until SELECT_APDU.size).contentEquals(SELECT_APDU)) {
             Log.d("HCE", "Comando SELECT con AID corretto ricevuto")
-            return byteArrayOf(0x90.toByte(), 0x00.toByte()) // OK
+            return byteArrayOf(0x90.toByte(), 0x00.toByte())
         }
 
         Log.d("HCE", "Ricevuto APDU: ${commandApdu?.joinToString(" ") { "%02X".format(it) }}")

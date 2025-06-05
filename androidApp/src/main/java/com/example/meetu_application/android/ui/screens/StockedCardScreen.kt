@@ -67,7 +67,7 @@ fun StackedCardScreen(
             }
         }
 
-        if (!isReady) {
+        if (!isReady && cards.size >= 2) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -137,7 +137,7 @@ fun StackedCardScreen(
                 }
             }else{
                 val visibleCardCount = otherCards.size.coerceAtMost(7)
-                val baseOffset = (visibleCardCount * 32).dp + 280.dp
+                val baseOffset = (visibleCardCount * 32).dp + 300.dp
                 val fabVerticalOffset = if (otherCards.size > 7) baseOffset + 24.dp else baseOffset
 
                 FloatingActionButton(
