@@ -1,5 +1,6 @@
 package com.example.meetu_application.android.ui.components
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,12 +37,23 @@ import com.example.meetu_application.android.data.utils.emailValidator
 import com.example.meetu_application.android.data.utils.phoneValidator
 import com.example.meetu_application.android.data.utils.requiredValidator
 
+
 @Composable
 fun AddCardDialog(
     onDismiss: () -> Unit,
     onAdd: (Card) -> Unit,
     onPickContact: () -> Unit
 ) {
+    val darkTheme = isSystemInDarkTheme()
+
+    val primaryColor = if (darkTheme) Color(0xFF86C5FC) else MaterialTheme.colorScheme.primary
+    val onPrimaryColor = if (darkTheme) Color(0xFF4514B4) else MaterialTheme.colorScheme.onPrimary
+
+    val secondaryColor = if (darkTheme) Color(0xFF00B8FF) else MaterialTheme.colorScheme.secondary
+    val onSecondaryColor = if (darkTheme) Color.Black else MaterialTheme.colorScheme.onSecondary
+
+    val cancelTextColor = if (darkTheme) Color(0xFFFF6666) else Color.Red
+
     var name by remember { mutableStateOf("") }
     var surname by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
@@ -50,6 +62,8 @@ fun AddCardDialog(
     var title by remember { mutableStateOf("") }
     var webSite by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
+
+    var phonePrefix by remember { mutableStateOf("+39") }
 
     // Stati touched per validazione
     var touchedName by remember { mutableStateOf(false) }
@@ -105,17 +119,26 @@ fun AddCardDialog(
                     onFocusLost = { touchedSurname = true },
                     modifier = Modifier.fillMaxWidth()
                 )
-
-                ValidatedInputField(
-                    value = phone,
-                    onValueChange = { phone = it },
-                    label = "Telefono*",
-                    validator = phoneValidator(),
-                    touched = touchedPhone,
-                    onFocusLost = { touchedPhone = true },
-                    keyboardType = KeyboardType.Number,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CountryCodePicker(
+                        selectedDialCode = phonePrefix,
+                        onDialCodeChanged = { phonePrefix = it },
+                        modifier = Modifier.weight(1.25f)
+                    )
+                    ValidatedInputField(
+                        value = phone,
+                        onValueChange = { phone = it },
+                        label = "Telefono*",
+                        validator = phoneValidator(),
+                        touched = touchedPhone,
+                        onFocusLost = { touchedPhone = true },
+                        keyboardType = KeyboardType.Number,
+                        modifier = Modifier.weight(2f)
+                    )
+                }
 
                 ValidatedInputField(
                     value = email,
@@ -184,10 +207,11 @@ fun AddCardDialog(
 
                 Button(
                      onClick = {
+                         val fullPhone = if (phone.isBlank()) null else phonePrefix + phone
                         val newCard = Card.fromInput(
                             name,
                             surname,
-                            phone.ifBlank { null },
+                            fullPhone,
                             email.ifBlank { null },
                             organization.ifBlank { null },
                             title.ifBlank { null },

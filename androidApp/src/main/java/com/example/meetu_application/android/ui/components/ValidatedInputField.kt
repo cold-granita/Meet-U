@@ -1,5 +1,6 @@
 package com.example.meetu_application.android.ui.components
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 
+
 @Composable
 fun ValidatedInputField(
     label: String,
@@ -36,6 +38,13 @@ fun ValidatedInputField(
     var hasFocus by remember { mutableStateOf(false) }
     val errorMessage = if (touched && validator != null) validator(value) else null
     val isError = errorMessage != null
+
+    val darkTheme = isSystemInDarkTheme()
+
+    val focusedContainerColor = if (darkTheme) Color(0xFF1565C0) else Color(0xFF9FD0FF)
+    val unfocusedContainerColor = if (darkTheme) Color(0xFF0D47A1) else Color(0xFFC8E4FF)
+    val errorContainerColor = if (darkTheme) Color(0xFFFF5772) else Color(0xFFFFCDD2)
+    val textColor = if (darkTheme) Color.White else Color.Black
 
     Column(modifier = modifier) {
         TextField(
@@ -56,12 +65,12 @@ fun ValidatedInputField(
             singleLine = singleLine,
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color(0xFF9FD0FF),
-                unfocusedContainerColor = Color(0xFFC8E4FF),
-                errorContainerColor = Color(0xFFFFCDD2),
+                focusedContainerColor = focusedContainerColor,
+                unfocusedContainerColor = unfocusedContainerColor,
+                errorContainerColor = errorContainerColor,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-                errorIndicatorColor = Color.Transparent
+                errorIndicatorColor = Color.Transparent,
             )
         )
         if (isError) {

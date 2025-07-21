@@ -24,7 +24,6 @@ import com.example.meetu_application.android.ui.screens.WalletScreen
 @Composable
 fun AppNavigation(
     navController: NavHostController,
-    onVCardReady: (String) -> Unit,
     onWriterReady: (NFCWriter, (String) -> Unit) -> Unit
 ){
     SharedTransitionLayout {
@@ -41,7 +40,7 @@ fun AppNavigation(
                 val card = cards.find{it.id == cardId}
 
                 if (card != null) {
-                    CardDetailScreen(card = card, navController = navController,  onVCardReady = onVCardReady)
+                    CardDetailScreen(card = card, navController = navController)
                 } else {
                     Text("Errore: carta non trovata per id $cardId")
                 }

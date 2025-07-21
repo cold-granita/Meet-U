@@ -1,14 +1,13 @@
 package com.example.meetu_application.android.ui.screens
 
 import android.app.Activity
-import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -36,31 +36,69 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import com.example.meetu_application.android.data.model.Card
 import com.example.meetu_application.android.data.nfc.NFCReader
 import com.example.meetu_application.android.data.nfc.parseVCardToCard
 import com.example.meetu_application.android.data.storage.loadCardsFromWallet
 import com.example.meetu_application.android.data.storage.saveCardsToWallet
 import com.example.meetu_application.android.data.utils.isValidWebsite
-import com.example.meetu_application.android.ui.components.ClickableCard
+import com.example.meetu_application.android.ui.components.AddToContactsButton
+import com.example.meetu_application.android.ui.components.CardView
+import com.example.meetu_application.android.ui.components.OpenUrlDialog
 import kotlinx.coroutines.flow.collectLatest
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NfcReaderScreen(navController: NavController) {
     val context = LocalContext.current
+    val activity = context as? Activity
     val nfcManager = remember { NFCReader(context) }
+
     var tagText by remember { mutableStateOf("Avvicina un tag NFC...") }
     var parsedCard by remember { mutableStateOf<Card?>(null) }
     var cards by remember { mutableStateOf(loadCardsFromWallet(context)) }
 
+    var showDialog by remember { mutableStateOf(false) }
+    var urlToOpen by remember { mutableStateOf<String?>(null) }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
     var dots by remember { mutableStateOf("") }
+
+
+    DisposableEffect(lifecycleOwner, activity) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> {
+                    activity?.let {
+                        nfcManager.register(it)
+                    }
+                }
+                Lifecycle.Event.ON_PAUSE -> {
+                    activity?.let {
+                        nfcManager.unregister(it)
+                    }
+                }
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            activity?.let {
+                nfcManager.unregister(it)
+            }
+        }
+    }
 
 
     DisposableEffect(navController) {
@@ -76,7 +114,11 @@ fun NfcReaderScreen(navController: NavController) {
             nfcManager.tags.collectLatest { tagData ->
                 val parsed = parseVCardToCard(tagData)
                 parsedCard = parsed
-                tagText = parsed?.let { "Card NFC ricevuta" } ?: tagData
+                tagText = when {
+                    tagData.isBlank() -> "Tag NFC vuoto"
+                    parsed == null -> tagData // testo grezzo non convertibile in card
+                    else -> "Card NFC ricevuta"
+                }
             }
         } else {
             tagText = "Errore: contesto non è un'Activity"
@@ -123,20 +165,27 @@ fun NfcReaderScreen(navController: NavController) {
                 .padding(24.dp)
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                if (parsedCard != null) {
+                if (tagText == "Tag NFC vuoto") {
+                    Log.d("TAG_VUOTO", "Tag vuoto")
+                    Text(
+                        text = "Il tag NFC è vuoto o non contiene dati validi.",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                } else if (parsedCard != null) {
                     Text(
                         text = "Contatto rilevato",
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
-                    ClickableCard(
+                    CardView(
                         card = parsedCard!!,
-                        navController = navController as NavHostController,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(200.dp)
+                            .height(220.dp)
                     )
+
 
                     Button(
                         onClick = {
@@ -154,8 +203,13 @@ fun NfcReaderScreen(navController: NavController) {
                             .padding(top = 24.dp)
                             .fillMaxWidth()
                     ) {
-                        Text("Salva contatto")
+                        Icon(Icons.Default.Add, "Aggiungi al wallet")
+                        Text("Aggiungi carta nel wallet")
                     }
+
+                    AddToContactsButton(parsedCard!!)
+
+                    Spacer(modifier = Modifier.height(30.dp))
 
                     Button(
                         colors = ButtonDefaults.buttonColors(
@@ -204,33 +258,21 @@ fun NfcReaderScreen(navController: NavController) {
                             val a = isValidWebsite(tagText)
                             Log.d("VALID", "a: {$a}")
                             if (isValidWebsite(tagText)) {
+                                val formattedUrl = if (tagText.startsWith("http://") || tagText.startsWith("https://")) {
+                                    tagText
+                                } else {
+                                    "https://$tagText"
+                                }
+
                                 Text(
                                     text = tagText,
                                     color = MaterialTheme.colorScheme.primary,
                                     textDecoration = TextDecoration.Underline,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .pointerInput(Unit) {
-                                            detectTapGestures(onTap = {
-                                                Toast.makeText(
-                                                    context,
-                                                    "Link cliccato!",
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
-                                                val urlToOpen =
-                                                    if (tagText.startsWith("http://") || tagText.startsWith(
-                                                            "https://"
-                                                        )
-                                                    ) {
-                                                        tagText
-                                                    } else {
-                                                        "https://$tagText"
-                                                    }
-                                                val intent =
-                                                    Intent(Intent.ACTION_VIEW, Uri.parse(urlToOpen))
-                                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                context.startActivity(intent)
-                                            })
+                                        .clickable {
+                                            urlToOpen = formattedUrl
+                                            showDialog = true
                                         }
                                 )
                             } else {
@@ -239,6 +281,7 @@ fun NfcReaderScreen(navController: NavController) {
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
+
                         }
                     }
                     Button(
@@ -258,6 +301,17 @@ fun NfcReaderScreen(navController: NavController) {
                 }
 
             }
+            if (showDialog && urlToOpen != null) {
+                OpenUrlDialog(
+                    url = urlToOpen!!,
+                    context = context,
+                    onDismiss = {
+                        showDialog = false
+                        urlToOpen = null
+                    }
+                )
+            }
+
         }
     }
 }

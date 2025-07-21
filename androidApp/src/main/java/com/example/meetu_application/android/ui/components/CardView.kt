@@ -71,7 +71,8 @@ fun CardView(
                         brush = Brush.verticalGradient(
                             colors = listOf(
                                 Color(0xFF5B84FF),
-                                Color(0xFF67BFFF).copy(alpha = bottomGradientAlpha)
+                                Color(0xFF67BFFF).copy(alpha = bottomGradientAlpha),
+
                             )
                         )
                     )

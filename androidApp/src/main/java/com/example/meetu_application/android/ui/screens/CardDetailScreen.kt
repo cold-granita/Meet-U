@@ -1,13 +1,13 @@
-    package com.example.meetu_application.android.ui.screens
+package com.example.meetu_application.android.ui.screens
 
 import android.content.pm.PackageManager
 import android.nfc.NfcAdapter
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -44,7 +44,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -57,7 +56,8 @@ import com.example.meetu_application.android.R
 import com.example.meetu_application.android.data.model.Card
 import com.example.meetu_application.android.data.nfc.VCardApduService
 import com.example.meetu_application.android.data.storage.PreferenceManager
-import com.example.meetu_application.android.ui.components.NfcWaveAnimation
+import com.example.meetu_application.android.ui.components.AddToContactsButton
+import com.example.meetu_application.android.ui.components.NFCSignalAnimation
 import com.example.meetu_application.android.ui.theme.colorMeetU
 import com.example.meetu_application.android.utils.generateQRCode
 import com.example.meetu_application.android.utils.generateVCard
@@ -66,7 +66,7 @@ import kotlinx.coroutines.launch
 
     @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CardDetailScreen(card: Card, navController: NavController, onVCardReady: (String)->Unit) {
+fun CardDetailScreen(card: Card, navController: NavController) {
         val context = LocalContext.current
         Log.d("HCE",">>> CardDetailScreen creato con card: ${card.name} ${card.surname}")
 
@@ -135,27 +135,32 @@ fun CardDetailScreen(card: Card, navController: NavController, onVCardReady: (St
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.Top
         ) {
-            Box(
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp)  // Altezza fissa per mostrare metà animazione
-                    .clipToBounds(), // Importantissimo per tagliare tutto ciò che esce
-                contentAlignment = Alignment.TopCenter
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                NfcWaveAnimation(
-                    modifier = Modifier.size(160.dp) // Dimensione totale animazione (più alta)
+                NFCSignalAnimation(modifier = Modifier.size(60.dp))
+                Text(
+                    text = "Avvicina ad un Meet-U",
+                    color = Color.Gray,
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+
                 )
             }
-            
+
             ElevatedCard(
                 shape = RoundedCornerShape(24.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
             ) {
                 Column(
                     modifier = Modifier
@@ -192,17 +197,28 @@ fun CardDetailScreen(card: Card, navController: NavController, onVCardReady: (St
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             Button(
                 onClick = {navController.navigate("cardEdit/${card.id}") },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
             ) {
                 Icon(Icons.Default.Create, contentDescription = "Edit card", tint = Color.White)
                 Text(" Modifica la Card")
             }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            AddToContactsButton(card, modifier = Modifier.padding(horizontal = 24.dp))
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             qrCodeBitmap?.let {
                 Image(

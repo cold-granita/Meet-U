@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -46,6 +47,7 @@ import com.example.meetu_application.android.data.utils.isValidPhone
 import com.example.meetu_application.android.data.utils.phoneValidator
 import com.example.meetu_application.android.data.utils.requiredValidator
 import com.example.meetu_application.android.data.utils.websiteValidator
+import com.example.meetu_application.android.ui.components.CountryCodePicker
 import com.example.meetu_application.android.ui.components.ValidatedInputField
 import com.example.meetu_application.android.ui.components.WriteStatusView
 
@@ -75,6 +77,8 @@ fun NfcWriterScreen(
     //campo per URL
     var website_url by remember { mutableStateOf("") }
     var touchedWebSite by remember { mutableStateOf(false) }
+
+    var phonePrefix by remember { mutableStateOf("+39") }
 
     // Stati per validazione (se il campo è stato toccato e perso il focus)
     var touchedFirstName by remember { mutableStateOf(false) }
@@ -190,6 +194,8 @@ fun NfcWriterScreen(
                     onLastNameChange = { lastName = it },
                     phone = phone,
                     onPhoneChange = { phone = it },
+                    phonePrefix = phonePrefix,
+                    onPhonePrefixChange = { phonePrefix = it },
                     email = email,
                     onEmailChange = { email = it },
                     organization = organization,
@@ -219,7 +225,7 @@ fun NfcWriterScreen(
                         "vcard" -> createVCardMessageOrNull(
                             firstName,
                             lastName,
-                            phone,
+                            phonePrefix + phone,
                             email,
                             organization,
                             title,
@@ -280,6 +286,8 @@ private fun VCardForm(
     onLastNameChange: (String) -> Unit,
     phone: String,
     onPhoneChange: (String) -> Unit,
+    phonePrefix: String,
+    onPhonePrefixChange: (String) -> Unit,
     email: String,
     onEmailChange: (String) -> Unit,
     organization: String,
@@ -319,18 +327,26 @@ private fun VCardForm(
             touched = touchedLastName,
             onFocusLost = onLastNameFocusLost
         )
-
-        ValidatedInputField(
-            label = "Telefono*",
-            placeholder = "0123456789",
-            value = phone,
-            onValueChange = onPhoneChange,
-            validator = phoneValidator(),
-            touched = touchedPhone,
-            onFocusLost = onPhoneFocusLost,
-            keyboardType = KeyboardType.Phone
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            CountryCodePicker(
+            selectedDialCode = phonePrefix,
+            onDialCodeChanged = onPhonePrefixChange,
+            modifier = Modifier.widthIn(min = 100.dp)
         )
-
+            ValidatedInputField(
+                label = "Telefono*",
+                placeholder = "0123456789",
+                value = phone,
+                onValueChange = onPhoneChange,
+                validator = phoneValidator(),
+                touched = touchedPhone,
+                onFocusLost = onPhoneFocusLost,
+                keyboardType = KeyboardType.Phone
+            )
+        }
         ValidatedInputField(
             label = "Email*",
             placeholder = "mario@example.com",
@@ -390,10 +406,12 @@ private fun createVCardMessageOrNull(
     address: String,
     website: String
 ): NdefMessage? {
+    val phoneWithoutPrefix = phone.removePrefix("+").dropWhile { it.isDigit().not() }
+
     if (firstName.isBlank() || lastName.isBlank() || phone.isBlank() || email.isBlank()) {
         return null
     }
-    if (!isValidPhone(phone) || !isValidEmail(email)) {
+    if (!isValidPhone(phoneWithoutPrefix) || !isValidEmail(email)) {
         return null
     }
     return NFCWriter.createVCardMessage(

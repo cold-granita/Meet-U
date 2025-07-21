@@ -30,7 +30,7 @@ class NFCReader(private val context: Context) : NfcAdapter.ReaderCallback {
 
         if (nfcAdapter != null) {
             val options = Bundle()
-            options.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 500)
+            options.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 1000)
 
             nfcAdapter!!.enableReaderMode(
                 activity,
@@ -46,12 +46,24 @@ class NFCReader(private val context: Context) : NfcAdapter.ReaderCallback {
         }
     }
 
+    fun unregister(activity: Activity) {
+        nfcAdapter?.disableReaderMode(activity)
+    }
+
+
     override fun onTagDiscovered(tag: Tag?) {
-        if (tag == null) return
+        Log.d("HCE", "Tag discovered: $tag")
+        Log.d("HCE", "Tech list: ${tag?.techList?.joinToString(", ")}")
+        if (tag == null) {
+            scope.launch {
+                _tagData.emit("Tag NFC vuoto")
+            }
+            return
+        }
 
         val ndef = Ndef.get(tag)
         val ndefMessage: NdefMessage? = ndef?.cachedNdefMessage
-
+        Log.d("NDEF", "{$ndefMessage}")
         if (ndefMessage != null) {
             for (record in ndefMessage.records) {
                 val payload = record.payload
@@ -82,9 +94,11 @@ class NFCReader(private val context: Context) : NfcAdapter.ReaderCallback {
                     _tagData.emit(text)
                 }
             }
+
             vibrateDevice(context)
         } else {
             val isoDep = IsoDep.get(tag)
+            Log.d("HCE"," isoDep value: {$isoDep}")
             if (isoDep != null) {
                 try {
                     isoDep.connect()
@@ -173,8 +187,12 @@ class NFCReader(private val context: Context) : NfcAdapter.ReaderCallback {
                     } catch (_: Exception) {
                     }
                 }
+            }else{
+                scope.launch {
+                    _tagData.emit("Il tag NFC è vuoto o non contiene dati validi.")
+                }
             }
-
         }
+
     }
 }
