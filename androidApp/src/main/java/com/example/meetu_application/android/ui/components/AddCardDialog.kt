@@ -197,7 +197,7 @@ fun AddCardDialog(
                     onClick = onPickContact,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        contentColor = if (darkTheme) Color.White else MaterialTheme.colorScheme.onPrimary
                     ),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -223,7 +223,7 @@ fun AddCardDialog(
                     enabled = isFormValid,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.secondary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary
+                        contentColor = if (darkTheme) Color.White else MaterialTheme.colorScheme.onSecondary
                     ),
                     modifier = Modifier.fillMaxWidth()
                 ) {

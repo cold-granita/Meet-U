@@ -3,6 +3,7 @@ package com.example.meetu_application.android.ui.screens
 import android.app.Activity
 import android.nfc.NdefMessage
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -99,6 +100,8 @@ fun NfcWriterScreen(
             }
         })
     }
+
+    val darkTheme = isSystemInDarkTheme()
 
     LaunchedEffect(Unit) {
         onWriterReady(nfcWriter) { status ->
@@ -216,6 +219,13 @@ fun NfcWriterScreen(
                     onEmailFocusLost = { touchedEmail = true }
                 )
             }
+            // fuori dal Button per essere riutilizzata
+            val isButtonEnabled = when (selectedType) {
+                "vcard" -> isWriteEnabled(selectedType, "", firstName, lastName, phone, email)
+                "url" -> isWriteEnabled(selectedType, website_url, "", "", "", "")
+                else -> isWriteEnabled(selectedType, inputData, "", "", "", "")
+            }
+
 
             Button(
                 onClick = {
@@ -245,14 +255,10 @@ fun NfcWriterScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(60.dp),
-                enabled = when (selectedType) {
-                    "vcard" -> isWriteEnabled(selectedType, "", firstName, lastName, phone, email)
-                    "url" -> isWriteEnabled(selectedType, website_url, "", "", "", "")
-                    else -> isWriteEnabled(selectedType, inputData, "", "", "", "")
-                }
+                enabled = isButtonEnabled
 
             ) {
-                Text("Scrivi su tag NFC")
+                Text("Scrivi su tag NFC", color = if (darkTheme&&isButtonEnabled) Color.White else Color.Black)
             }
             WriteStatusView(
                 status = writeStatus,

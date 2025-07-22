@@ -12,6 +12,8 @@ data class Card(
     val title: String? = null,
     val webSite: String? = null,
     val address: String? = null,
+    val themeColorId: Int = 0 // 0: Blu, 1: Verde, 2: Rosso, 3: Viola
+
 ) {
     // Costruttore da input manuale
     companion object {

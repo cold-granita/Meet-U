@@ -2,6 +2,7 @@ package com.example.meetu_application.android.ui.components
 
 import android.content.Intent
 import android.provider.ContactsContract
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -14,6 +15,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.meetu_application.android.data.model.Card
@@ -21,6 +23,7 @@ import com.example.meetu_application.android.data.model.Card
 @Composable
 fun AddToContactsButton(card: Card, modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    val darkTheme = isSystemInDarkTheme()
 
     OutlinedButton(
         onClick = {
@@ -57,11 +60,12 @@ fun AddToContactsButton(card: Card, modifier: Modifier = Modifier) {
             .fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.secondary,
-            contentColor = MaterialTheme.colorScheme.onSecondary
+            contentColor = if (darkTheme) Color.White else MaterialTheme.colorScheme.onSecondary
 
-        )
+        ),
+        border = null
     ) {
-        Icon(Icons.Default.Call, contentDescription = "Add to contacts")
+        Icon(Icons.Default.Call, contentDescription = "Add to contacts", tint = if (darkTheme) Color.White else Color.Black)
         Spacer(modifier = Modifier.size(8.dp))
         Text("Aggiungi alla rubrica")
     }

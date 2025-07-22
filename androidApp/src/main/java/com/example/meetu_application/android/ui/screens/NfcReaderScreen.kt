@@ -5,6 +5,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -72,6 +73,8 @@ fun NfcReaderScreen(navController: NavController) {
     val lifecycleOwner = LocalLifecycleOwner.current
 
     var dots by remember { mutableStateOf("") }
+
+    val darkTheme = isSystemInDarkTheme()
 
 
     DisposableEffect(lifecycleOwner, activity) {
@@ -211,11 +214,12 @@ fun NfcReaderScreen(navController: NavController) {
 
                     Spacer(modifier = Modifier.height(30.dp))
 
+                    val contentColor = if (isSystemInDarkTheme()) Color.White else MaterialTheme.colorScheme.onSecondary
                     Button(
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary
-                        ),
+                            contentColor = contentColor
+                    ),
                         onClick = {
                             parsedCard = null
                             tagText = "Avvicina un tag NFC..."
@@ -224,7 +228,7 @@ fun NfcReaderScreen(navController: NavController) {
                             .padding(top = 12.dp)
                             .fillMaxWidth(),
                     ) {
-                        Text("Scansiona di nuovo")
+                        Text("Scansiona di nuovo", color = contentColor)
                     }
 
                 } else {
@@ -284,10 +288,11 @@ fun NfcReaderScreen(navController: NavController) {
 
                         }
                     }
+                    val contentColor = if (isSystemInDarkTheme()) Color.White else MaterialTheme.colorScheme.onSecondary
                     Button(
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary
+                            contentColor = contentColor
                         ),
                         onClick = {
                             tagText = "Avvicina un tag NFC..."
@@ -296,7 +301,7 @@ fun NfcReaderScreen(navController: NavController) {
                             .padding(top = 16.dp)
                             .fillMaxWidth()
                     ) {
-                        Text("Scansiona di nuovo")
+                        Text("Scansiona di nuovo", color=contentColor)
                     }
                 }
 

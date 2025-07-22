@@ -4,6 +4,7 @@ import android.content.pm.PackageManager
 import android.nfc.NfcAdapter
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -100,9 +101,10 @@ fun CardDetailScreen(card: Card, navController: NavController) {
     val isPreferred = preferredCardId == card.id
     val coroutineScope = rememberCoroutineScope()
 
+    val darkTheme = isSystemInDarkTheme()
 
 
-    Scaffold(
+        Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("${card.name} ${card.surname}") },
@@ -204,7 +206,7 @@ fun CardDetailScreen(card: Card, navController: NavController) {
                 onClick = {navController.navigate("cardEdit/${card.id}") },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    contentColor = if (darkTheme) Color.White else MaterialTheme.colorScheme.onPrimary
                 ),
                 modifier = Modifier
                     .fillMaxWidth()

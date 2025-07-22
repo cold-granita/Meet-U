@@ -1,5 +1,6 @@
 package com.example.meetu_application.android.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -49,6 +50,9 @@ fun CardView(
     bottomGradientAlpha: Float = 1f,
     contentAlpha: Float = 1f
 ) {
+
+    val theme = cardColorThemes.getOrNull(card.themeColorId) ?: cardColorThemes.first()
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -70,23 +74,24 @@ fun CardView(
                     .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                Color(0xFF5B84FF),
-                                Color(0xFF67BFFF).copy(alpha = bottomGradientAlpha),
+                               theme.topColor,
+                                theme.bottomColor.copy(alpha = bottomGradientAlpha),
 
                             )
                         )
                     )
             ) {
-                // ✅ Canvas decorativa
+                // Canvas decorativa
                 Canvas(modifier = Modifier
                     .fillMaxSize()
                 ) {
+                    Log.e("CANVA", "Canvas size: ${size.width} x ${size.height}")
                     val canvasWidth = size.width
                     val canvasHeight = size.height
 
                     drawCircle(
                         brush = Brush.radialGradient(
-                            colors = listOf(Color(0xFF3C6DFF), Color(0xFF4791FF)),
+                            colors = theme.radialColorsTop,
                             center = Offset(x = canvasWidth, y = 0f),
                             radius = canvasWidth * 0.3f
                         ),
@@ -96,7 +101,7 @@ fun CardView(
 
                     drawCircle(
                         brush = Brush.radialGradient(
-                            colors = listOf(Color(0xFF4975FD), Color(0xFF5498FF)),
+                            colors = theme.radialColorsBottom,
                             center = Offset(x = 0f, y = canvasHeight),
                             radius = canvasWidth * 0.25f
                         ),
@@ -113,7 +118,7 @@ fun CardView(
                         .clip(RoundedCornerShape(16.dp))
                 )
 
-                // ✅ Contenuto senza alpha diretta
+                //Contenuto senza alpha diretta
                 Column(
                     modifier = Modifier
                         .padding(20.dp)
@@ -152,6 +157,9 @@ fun CardView(
                         }
                         card.organization?.takeIf { it.isNotBlank() }?.let {
                             IconTextRow(painterResource(id = R.drawable.company), it, Color.White)
+                        }
+                        card.address?.takeIf { it.isNotBlank() }?.let {
+                            IconTextRow(painterResource(id = R.drawable.address), it, Color.White)
                         }
                     }
                 }

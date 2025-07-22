@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.times
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import com.example.meetu_application.android.data.model.Card
@@ -136,10 +137,17 @@ fun StackedCardScreen(
                     Icon(Icons.Default.Add, contentDescription = "Aggiungi", tint = Color.White)
                 }
             }else{
-                val visibleCardCount = otherCards.size.coerceAtMost(7)
+               /* val visibleCardCount = otherCards.size.coerceAtMost(7)
                 val baseOffset = (visibleCardCount * 32).dp + 300.dp
                 val fabVerticalOffset = if (otherCards.size > 7) baseOffset + 24.dp else baseOffset
-
+                */
+                val baseFabOffset = 400.dp // posizione base per 4 o meno carte
+                val extraOffsetPerCard = 55.dp
+                val fabVerticalOffset = if (otherCards.size > 4) {
+                    baseFabOffset + (otherCards.size - 4).coerceAtMost(3) * extraOffsetPerCard
+                } else {
+                    baseFabOffset
+                }
                 FloatingActionButton(
                     onClick = onAddClick,
                     containerColor = com.example.meetu_application.android.ui.theme.colorMeetU,

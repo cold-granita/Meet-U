@@ -1,11 +1,20 @@
 package com.example.meetu_application.android.ui.screens
 
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -25,8 +34,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -34,10 +45,12 @@ import androidx.navigation.NavHostController
 import com.example.meetu_application.android.data.storage.deleteCard
 import com.example.meetu_application.android.data.storage.saveUpdatedCard
 import com.example.meetu_application.android.data.utils.emailValidator
-import com.example.meetu_application.android.data.utils.phoneValidator
+import com.example.meetu_application.android.data.utils.phoneValidatorEdit
 import com.example.meetu_application.android.data.utils.requiredValidator
 import com.example.meetu_application.android.data.utils.websiteValidator
+import com.example.meetu_application.android.ui.components.CardView
 import com.example.meetu_application.android.ui.components.ConfirmDeleteCardDialog
+import com.example.meetu_application.android.ui.components.cardColorThemes
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,7 +82,7 @@ fun CardEditScreen(
     val nameValidator = requiredValidator("Nome")
     val surnameValidator = requiredValidator("Cognome")
     val emailValidator = emailValidator()  // crea la lambda di validazione email
-    val phoneValidator = phoneValidator()  // crea la lambda di validazione telefono
+    val phoneValidator = phoneValidatorEdit()  // crea la lambda di validazione telefono
     val websiteValidator = websiteValidator()  // crea la lambda di validazione sito web
 
     fun validateAll(): Boolean {
@@ -81,6 +94,12 @@ fun CardEditScreen(
 
         return listOf(nameError, surnameError, emailError, phoneError, websiteError).all { it == null }
     }
+
+    //Colore card
+    var selectedColorIndex by remember { mutableStateOf(card.themeColorId) }
+
+    //Scroll pagina
+    val scrollState = rememberScrollState()
 
 
 
@@ -117,7 +136,8 @@ fun CardEditScreen(
                             email = email,
                             organization = organization,
                             webSite = webSite,
-                            address = address
+                            address = address,
+                            themeColorId = selectedColorIndex
                         )
                         saveUpdatedCard(context, updatedCard)
                         navController.popBackStack() // Torna indietro dopo il salvataggio
@@ -136,7 +156,8 @@ fun CardEditScreen(
         Column(
             modifier = Modifier
                 .padding(padding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             //colori che userò per tutti i textfields
@@ -247,6 +268,47 @@ fun CardEditScreen(
                 modifier = Modifier.fillMaxWidth(),
                 colors = colors
             )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically,
+               ) {
+                cardColorThemes.forEachIndexed { index, theme ->
+                    Box(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clip(CircleShape)
+                            .background(Brush.verticalGradient(colors = listOf(theme.topColor, theme.bottomColor)))
+                            .border(
+                                width = if (index == selectedColorIndex) 3.dp else 1.dp,
+                                color = if (index == selectedColorIndex) MaterialTheme.colorScheme.primary else Color.Gray,
+                                shape = CircleShape
+                            )
+                            .clickable { selectedColorIndex = index }
+                    )
+                }
+            }
+
+            val previewCard = card.copy(
+                name = name,
+                surname = surname,
+                title = title,
+                telephoneNumber = telephoneNumber,
+                email = email,
+                organization = organization,
+                webSite = webSite,
+                address = address,
+                themeColorId = selectedColorIndex
+            )
+
+            CardView(
+                card = previewCard,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+            )
+
         }
     }
     if (showDeleteDialog) {
