@@ -7,13 +7,16 @@ package com.example.meetu_application.android.data.utils
 
 // Funzione per validare telefono (solo cifre, tra 8 e 15 caratteri)
  fun isValidPhone(phone: String): Boolean {
+    val cleanedPhone = phone.replace(Regex("[\\s-]"), "")
     val phoneRegex = Regex("^\\d{8,15}$")
-    return phoneRegex.matches(phone)
+    return phoneRegex.matches(cleanedPhone)
 }
 
 fun isValidPhoneEdit(phone: String): Boolean {
-    val phoneRegex = Regex("^\\+?\\d{8,15}$") // consente un "+" opzionale all'inizio
-    return phoneRegex.matches(phone)
+    // Consente + opzionale, cifre, spazi e trattini. Conta solo le cifre per il range.
+    val cleanedPhone = phone.replace(Regex("[\\s-]"), "") // Rimuove spazi e trattini
+    val phoneRegex = Regex("^\\+?\\d{8,15}$") // Controlla solo le cifre rimanenti
+    return phoneRegex.matches(cleanedPhone)
 }
 
 

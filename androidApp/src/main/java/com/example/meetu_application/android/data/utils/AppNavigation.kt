@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -42,7 +41,8 @@ fun AppNavigation(
                 if (card != null) {
                     CardDetailScreen(card = card, navController = navController)
                 } else {
-                    Text("Errore: carta non trovata per id $cardId")
+                    MainScreen(navController)
+                    Log.i("ERRORE","Errore: carta non trovata per id $cardId")
                 }
             }
             composable("nfcWriter"){NfcWriterScreen(navController,onWriterReady)}
@@ -57,7 +57,8 @@ fun AppNavigation(
                 if (card != null) {
                     CardEditScreen(navController = navController, card = card)
                 } else {
-                    Text("Errore: carta non trovata per id $cardId")
+                    MainScreen(navController)
+                   Log.i("ERRORE","Errore: carta non trovata per id $cardId")
                 }
             }
         }

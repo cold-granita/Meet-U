@@ -103,7 +103,6 @@ fun CardDetailScreen(card: Card, navController: NavController) {
 
     val darkTheme = isSystemInDarkTheme()
 
-
         Scaffold(
         topBar = {
             CenterAlignedTopAppBar(

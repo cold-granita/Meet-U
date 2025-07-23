@@ -115,7 +115,7 @@ fun StackedCardScreen(
                             .align(Alignment.TopCenter)
                             .padding(top = 32.dp)
                             .fillMaxWidth(0.9f)
-                            .height(200.dp)
+                            .height(220.dp)
                             .shadow(
                                 elevation = 12.dp,
                                 shape = RoundedCornerShape(16.dp), // usa lo stesso shape della Card
@@ -189,7 +189,7 @@ fun StackedCardScreen(
                             .align(Alignment.TopCenter)
                             .offset(y = offsetY)
                             .fillMaxWidth(0.9f)
-                            .height(200.dp)
+                            .height(220.dp)
                             .alpha(alphaValue)
                             .zIndex(-index.toFloat()),
                         bottomGradientAlpha = bottomAlpha,

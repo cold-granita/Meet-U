@@ -60,12 +60,12 @@ fun AddToContactsButton(card: Card, modifier: Modifier = Modifier) {
             .fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.secondary,
-            contentColor = if (darkTheme) Color.White else MaterialTheme.colorScheme.onSecondary
+            contentColor = Color.White
 
         ),
         border = null
     ) {
-        Icon(Icons.Default.Call, contentDescription = "Add to contacts", tint = if (darkTheme) Color.White else Color.Black)
+        Icon(Icons.Default.Call, contentDescription = "Add to contacts", tint = Color.White)
         Spacer(modifier = Modifier.size(8.dp))
         Text("Aggiungi alla rubrica")
     }
