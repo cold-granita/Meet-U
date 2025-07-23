@@ -170,18 +170,14 @@ fun StackedCardScreen(
                     .align(Alignment.TopCenter)
                     .padding(top = (32 + 180 - 150).dp) //lontananza dalla carta preferred
             ) {
-                otherCards.forEachIndexed { index, card ->
+                otherCards.take(7).forEachIndexed { index, card ->
                     val offsetY = (index * 32).dp
                     val alphaValue by animateFloatAsState(
-                        targetValue = when {
-                            index >= 8 -> 0f
-                            index >= 4 -> 0.6f
-                            else -> 1f
-                        },
+                        targetValue = if (index >= 4) 0.6f else 1f,
                         label = "AlphaAnimation"
                     )
-                    val bottomAlpha = (1f - index / 10f).coerceIn(0.2f, 1f) // Più alto è l'indice, più trasparente in basso
-                    val contentAlpha = (1f - index / 8f).coerceIn(0.1f, 1f) // Dissolvo il contenuto (scritte)
+                    val bottomAlpha = (1f - index / 10f).coerceIn(0.2f, 1f)
+                    val contentAlpha = (1f - index / 8f).coerceIn(0.1f, 1f)
                     ClickableCard(
                         card = card,
                         navController = navController,
@@ -196,6 +192,7 @@ fun StackedCardScreen(
                         contentAlpha = contentAlpha
                     )
                 }
+
                 // Mostra "+X carte" se ci sono più di 7
                 if (otherCards.size > 7) {
                     val extraCards = otherCards.size - 7

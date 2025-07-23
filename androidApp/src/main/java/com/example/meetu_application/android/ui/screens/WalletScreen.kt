@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,6 +40,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.meetu_application.android.data.model.Card
+import com.example.meetu_application.android.data.storage.deleteCard
 import com.example.meetu_application.android.data.storage.loadCardsFromWallet
 import com.example.meetu_application.android.ui.components.ClickableCard
 import com.example.meetu_application.android.ui.components.ScrollDownArrow
@@ -57,6 +59,10 @@ fun WalletScreen(navController: NavHostController) {
         mutableStateListOf<MutableState<Boolean>>()
     }
 
+    //Per selezione multipla
+    val selectedCards = remember { mutableStateListOf<String>() }
+    val isSelectionMode = selectedCards.isNotEmpty()
+
     // Carica le carte all'avvio
     LaunchedEffect(Unit) {
         val loadedCards = loadCardsFromWallet(context)
@@ -72,18 +78,46 @@ fun WalletScreen(navController: NavHostController) {
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Wallet", style = MaterialTheme.typography.titleLarge) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigate("main") }) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Torna indietro"
-                        )
+            if (isSelectionMode) {
+                CenterAlignedTopAppBar(
+                    title = { Text("${selectedCards.size} selezionate") },
+                    navigationIcon = {
+                        IconButton(onClick = { selectedCards.clear() }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Annulla selezione")
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = {
+                            val toDelete = cards.value.filter { selectedCards.contains(it.id) }
+                            toDelete.forEach { deleteCard(context, it) }
+
+                            val updated = loadCardsFromWallet(context)
+                            cards.value = updated
+                            selectedCards.clear()
+
+                        }) {
+
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Elimina",
+                                    tint = Color.Red
+                                )
+
+                        }
                     }
-                }
-            )
+                )
+            } else {
+                CenterAlignedTopAppBar(
+                    title = { Text("Wallet", style = MaterialTheme.typography.titleLarge) },
+                    navigationIcon = {
+                        IconButton(onClick = { navController.navigate("main") }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Torna indietro")
+                        }
+                    }
+                )
+            }
         }
+
     ) { padding ->
         Box(
             modifier = Modifier
@@ -133,7 +167,16 @@ fun WalletScreen(navController: NavHostController) {
                             navController = navController,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(220.dp)
+                                .height(220.dp),
+                            isSelectable = isSelectionMode,
+                            isSelected = selectedCards.contains(card.id),
+                            onSelectToggle = {
+                                if (selectedCards.contains(card.id)) {
+                                    selectedCards.remove(card.id)
+                                } else {
+                                    selectedCards.add(card.id)
+                                }
+                            }
                         )
                     }
                 }

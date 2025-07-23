@@ -1,9 +1,11 @@
 package com.example.meetu_application.android.data.utils
 
 // Funzione per validare email
- fun isValidEmail(email: String): Boolean {
-    return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+fun isValidEmail(email: String): Boolean {
+    val trimmedEmail = email.trim()
+    return android.util.Patterns.EMAIL_ADDRESS.matcher(trimmedEmail).matches()
 }
+
 
 // Funzione per validare telefono (solo cifre, tra 8 e 15 caratteri)
  fun isValidPhone(phone: String): Boolean {
